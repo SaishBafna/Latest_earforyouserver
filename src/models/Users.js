@@ -29,12 +29,12 @@ const userSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date, // Use Date type for date of birth
-      required: true,
+      required: false,
     },
     gender: {
       type: String,
       enum: ['male', 'female', 'other'], // Enum for gender values
-      required: true,
+      required: false,
     },
     userCategory: {
       type: String,
