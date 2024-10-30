@@ -1,0 +1,23 @@
+"start": "babel-node index.js",
+
+
+
+abc token :
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmQ1OWY1ZWJjYTQzOTc1ZTVlYzVjMmUiLCJlbWFpbCI6ImFiYzEyM0BnbWFpbC5jb20iLCJ1c2VybmFtZSI6IkFiYyIsInNlcnZpY2VUeXBlIjoiRHJpdmVyIiwiaWF0IjoxNzI2MjA5ODY0LCJleHAiOjE3MjYyOTYyNjR9.WjBacg4doM3mjApDP2RnamkqqGyR4jqpz5e_9MDZJjw
+
+Saish :
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmUxNmE1YWE4ZmRiOTBkMTA3ZDQ0N2EiLCJlbWFpbCI6InNhaXNoQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoic2Fpc2giLCJzZXJ2aWNlVHlwZSI6IkFnZW50IiwiaWF0IjoxNzI2MjA5OTExLCJleHAiOjE3MjYyOTYzMTF9.fknQE-FfqH0YvF7nsJs6ep8rVUh3CdqJwzKyPIIKYx0
+
+
+
+now i want to test the my this on thunder client as my i need access token as well so i will provide you all details :
+
+ User 1 access token :
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmQ1OWY1ZWJjYTQzOTc1ZTVlYzVjMmUiLCJlbWFpbCI6ImFiYzEyM0BnbWFpbC5jb20iLCJ1c2VybmFtZSI6IkFiYyIsInNlcnZpY2VUeXBlIjoiRHJpdmVyIiwiaWF0IjoxNzI2MjA5ODY0LCJleHAiOjE3MjYyOTYyNjR9.WjBacg4doM3mjApDP2RnamkqqGyR4jqpz5e_9MDZJjw
+
+user 2 Access Token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmUxNmE1YWE4ZmRiOTBkMTA3ZDQ0N2EiLCJlbWFpbCI6InNhaXNoQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoic2Fpc2giLCJzZXJ2aWNlVHlwZSI6IkFnZW50IiwiaWF0IjoxNzI2MjA5OTExLCJleHAiOjE3MjYyOTYzMTF9.fknQE-FfqH0YvF7nsJs6ep8rVUh3CdqJwzKyPIIKYx0
+
+and here is the Chat Id :  66e16a7aa8fdb90d107d4489
+
+now how we can test the realtime chating of this Tow users On postman :

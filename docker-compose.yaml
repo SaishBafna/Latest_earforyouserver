@@ -1,0 +1,9 @@
+version: '3'
+services:
+  driverse:
+    image: 73835bf5cb82
+    container_name: driverse
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
