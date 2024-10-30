@@ -16,14 +16,12 @@ const key = JSON.parse(serviceAccountKey);
 
 // Initialize Google Cloud Storage using the parsed key JSON
 const storage = new Storage({
-  credentials: key, 
-  projectId: process.env.GCP_PROJECT_ID, 
+  credentials: key,
+  projectId: process.env.GCP_PROJECT_ID
 });
-
 const bucketName = process.env.GCP_BUCKET_NAME;
 if (!bucketName) {
   throw new Error('GCP_BUCKET_NAME is not defined in environment variables');
 }
 const bucket = storage.bucket(bucketName);
-
 export { bucket };
