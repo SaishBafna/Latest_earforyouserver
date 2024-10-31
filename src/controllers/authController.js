@@ -36,11 +36,11 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 export const registerUser = async (req, res) => {
-  const {   phone, password } = req.body; // Ensure correct field names
+  const { phone, password } = req.body; // Ensure correct field names
 
   try {
     // Check for required fields
-    const requiredFields = {  phone, password };
+    const requiredFields = { phone, password };
     const missingFields = Object.entries(requiredFields)
       .filter(([key, value]) => !value)
       .map(([key]) => key);
@@ -52,16 +52,16 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Check if user with email or phone already exists
-    const userExists = await User.findOne(  { phone } );
+    // Check if user with phone already exists
+    const userExists = await User.findOne({ phone });
     if (userExists) {
-      return res.status(400).json({ message: "User with this email or phone already exists" });
+      return res.status(400).json({ message: "User with this phone already exists" });
     }
 
     // Create new user
     const user = await User.create({
       phone,
-      password
+      password,
     });
 
     if (user) {
@@ -72,8 +72,6 @@ export const registerUser = async (req, res) => {
         accessToken,
         refreshToken,
         phone: user.phone,
-        accessToken,
-        refreshToken,
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
@@ -83,13 +81,12 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
 export const authUser = async (req, res) => {
-  const { email, phone, password, deviceToken, platform } = req.body;
+  const { phone, password, deviceToken, platform } = req.body;
 
-  // If email or phone is missing
-  if (!email && !phone) {
-    return res.status(400).json({ message: "Email or Phone is required" });
+  // If phone is missing
+  if (!phone) {
+    return res.status(400).json({ message: "Phone is required" });
   }
 
   // If password is missing
@@ -98,36 +95,34 @@ export const authUser = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ $or: [{ email }, { phone }] });
+    const user = await User.findOne({ phone });
 
     if (user && (await user.matchPassword(password))) {
       const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
-
+      // Update device token if provided
       if (deviceToken) {
         user.deviceToken = deviceToken;
         user.platform = platform || user.platform; // Use provided platform or keep the existing one
         await user.save();
       }
 
-
       return res.json({
         _id: user._id,
-        username: user.username,
-        email: user.email,
         phone: user.phone,
-        UserCategory: ROLES_LIST[user.UserCategory],
+        // Include only necessary fields
         accessToken,
         refreshToken,
         message: "User logged in successfully",
       });
     } else {
-      return res.status(401).json({ message: "Invalid email/phone or password" });
+      return res.status(401).json({ message: "Invalid phone or password" });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 
 export const logoutUser = async (req, res) => {

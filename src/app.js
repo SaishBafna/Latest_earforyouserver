@@ -117,21 +117,21 @@ app.get("/", (req, res) => {
 
 
 
-app.use('/api/v1/auth/', CallRoute);
+app.use('/api/v1/', CallRoute);
 
 
 //authRoutes
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1", authRoutes);
 
 
 
-app.use("/api/v1/auth/chats", chatRouter);
-app.use("/api/v1/auth/messages", messageRouter);
+app.use("/api/v1/chats", chatRouter);
+app.use("/api/v1/messages", messageRouter);
 
 // Leader Board Routes for rating and Review 
-app.use('/api/v1/auth', reviewRoutes); // Prefix all review routes with /api
-app.use('/api/v1/auth', userRoutes);
-app.use('/api/v1/auth',RechargeRoute);
+app.use('/api/v1', reviewRoutes); // Prefix all review routes with /api
+app.use('/api/v1', userRoutes);
+app.use('/api/v1',RechargeRoute);
 
 
 // FairBaseNotification
