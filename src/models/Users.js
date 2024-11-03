@@ -39,13 +39,17 @@ const userSchema = new mongoose.Schema(
       enum: ['male', 'female', 'other'], // Enum for gender values
       required: false,
     },
+    Language:{
+      type: String,
+      required: false,
+    },
     userCategory: {
       type: String,
-      enum: ["Motivational", "Therapist", "Listener", "Psychologist"],
+      enum: ["Doctor", "Therapist", "Healer", "Psychologist"],
     },
     userType: {
       type: String,
-      enum: ['CALLER', 'RECEIVER'], // Define the enum values
+      enum: ['CALLER', 'RECEIVER','Admin'], // Define the enum values
       default: 'CALLER', // Set default value
     },
     password: {

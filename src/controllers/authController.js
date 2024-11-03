@@ -255,7 +255,7 @@ export const updateOrCreateUserCategory = async (req, res) => {
     }
 
     // Validate userCategory (adjust the valid categories as needed)
-    const validUserCategories = ['category1', 'category2', 'category3']; // Replace with your actual categories
+    const validUserCategories = ["Doctor", "Therapist", "Healer", "Psychologist"]; // Replace with your actual categories
     if (!validUserCategories.includes(userCategory)) {
       return res.status(400).json({
         success: false,
@@ -302,11 +302,12 @@ export const updateOrCreateUserCategory = async (req, res) => {
     });
   }
 };
+
 // ------------------------useruserController.js---------------------------------------
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { username, dateOfBirth, gender } = req.body;
+    const { username, dateOfBirth, gender,Language } = req.body;
 
     // Validation
     if (username && typeof username !== 'string') {
@@ -320,11 +321,12 @@ export const updateProfile = async (req, res) => {
     }
 
     // Check if all required fields are provided
-    if (!username || !dateOfBirth || !gender) {
+    if (!username || !dateOfBirth || !gender||!Language) {
       // Create a new user if details are not available
       const newUser = new User({
         username,
         dateOfBirth,
+        Language,
         gender,
         // Add other required fields as necessary
       });
@@ -343,6 +345,7 @@ export const updateProfile = async (req, res) => {
       ...(username && { username }),
       ...(dateOfBirth && { dateOfBirth }),
       ...(gender && { gender }),
+      ...(Language && { Language }),
     };
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });

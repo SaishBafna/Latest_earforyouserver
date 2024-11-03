@@ -87,7 +87,7 @@ export const initiatePhonePePayment = async (req, res) => {
   try {
     const { userId, amount } = req.body;
     const transactionId = 'TXN' + Date.now();
-    const callbackUrl = `http://localhost:8080/api/v1/payment-callback`;
+    const callbackUrl = ``;
 
     // Validate minimum amount
     if (amount < 100) {
@@ -150,17 +150,10 @@ export const handlePhonePeCallback = async (req, res) => {
   let transactionId = 'UNKNOWN';
 
   try {
-
     console.log('Callback Headers:', req.headers);
     console.log('Callback Body:', );
-    console.log('Callback Headers:', req.headers);
-    console.log('Callback Body:', req.body);  // Fix this as well by logging the actual request body
     
-    // Extract the x-verify header correctly
-    const xVerify = req.headers['x-verify'];
-    console.log('x-verify:', xVerify);
-
-     
+console.log('x-verify:', xerify);
     const responseData =req.body
     
     console.log("responseData :",responseData);

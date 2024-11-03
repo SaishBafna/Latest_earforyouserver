@@ -30,12 +30,12 @@ router.post('/logout', protect, logoutUser);
 router.post('/update-device-token', protect, updateDeviceToken);
 
 
-router.put('/api/user/category/:userId', updateOrCreateUserCategory);
+router.put('/category/:userId', updateOrCreateUserCategory);
 
 // updateUserDeatil
 
 router.put('/updateProfile', updateProfile);
-
+router.put('/users/:userId', changeUserType);
 
 // Route to request OTP 
 router.post('/request-otp', requestOTP);
@@ -44,7 +44,7 @@ router.post('/verify-otp', verifyOTP);
 
 
 // Update userType route
-router.put('/users/:userId', changeUserType);
+
 router.get('/user/:userId', getUserById);
 
 router.get('/users',protect, getAllUsers);
