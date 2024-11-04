@@ -86,7 +86,7 @@ export const initiatePhonePePayment = async (req, res) => {
   try {
     const { userId, amount } = req.body;
     const transactionId = 'TXN' + Date.now();
-    const callbackUrl = 'http://localhost:8080/api/v1/payment-callback';
+    const callbackUrl = 'https://earforyou-server.onrender.com/api/v1/payment-callback';
 
     // Validate minimum amount
     if (amount < 100) {
@@ -247,4 +247,6 @@ export const handlePhonePeCallback = async (req, res) => {
     });
   }
 };
+
+
 
