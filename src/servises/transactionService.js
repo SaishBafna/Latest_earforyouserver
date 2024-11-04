@@ -11,37 +11,27 @@ const SALT_INDEX = process.env.SALT_INDEX;
 
 export const verifyPhonePePayment = async (merchantId, merchantTransactionId) => {
   try {
-    // Base URL and endpoint configuration
-    const baseUrl = process.env.PHONEPE_API_URL || 'https://api-preprod.phonepe.com/apis/pg-sandbox';
+    // Using the sandbox/preprod URL
+    const baseUrl = 'https://api-preprod.phonepe.com/apis/pg-sandbox';
     const url = `/v3/transaction/${merchantId}/${merchantTransactionId}/status`;
     
-    // Generate X-VERIFY checksum
-    const saltKey = '14fa5465-f8a7-443f-8477-f986b8fcfde9';
-    const saltIndex = 1;
+    // For preprod environment, the string to hash should include /pg-sandbox
+    const stringToHash = `/pg-sandbox/pg/v1/status/${merchantId}/${merchantTransactionId}${process.env.SALT_KEY}`;
     
-    if (!saltKey || !saltIndex) {
-      throw new Error('Missing SALT_KEY or SALT_INDEX in environment variables');
-    }
-
-    // Create the string to hash exactly as per PhonePe specs
-    const stringToHash = `/pg/v1/status/${merchantId}/${merchantTransactionId}${saltKey}`;
-    
-    // Generate checksum with proper encoding
+    // Generate checksum
     const checksum = crypto.createHash('sha256')
       .update(stringToHash)
-      .digest('hex') + '###' + saltIndex;
+      .digest('hex') + '###' + process.env.SALT_INDEX;
 
-    console.log('Request URL:', `${baseUrl}${url}`);
-    console.log('Checksum:', checksum);
+    console.log('String to Hash:', stringToHash);
+    console.log('Generated Checksum:', checksum);
 
     const response = await axios.get(`${baseUrl}${url}`, {
       headers: {
         'X-VERIFY': checksum,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      // Add timeout to prevent hanging requests
-      timeout: 10000
+      }
     });
 
     if (response.status !== 200) {
@@ -51,7 +41,6 @@ export const verifyPhonePePayment = async (merchantId, merchantTransactionId) =>
     return response.data;
   } catch (error) {
     if (error.response) {
-      // Log detailed error information
       console.error('PhonePe API Error Details:', {
         status: error.response.status,
         headers: error.response.headers,
