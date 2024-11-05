@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/pay", initiatePayment);
 
 // Route to validate payment
-router.get("/validate", protect,validatePayment);
+router.post("/validate", protect,validatePayment);
 // router.get("/validate/:merchantTransactionId/:userId", validatePayment);
 
 
