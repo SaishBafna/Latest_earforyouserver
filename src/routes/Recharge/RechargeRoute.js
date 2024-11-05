@@ -5,7 +5,7 @@ import { deductPerMinute } from '../../controllers/Recharge/Decudition.js'
 import { protect } from '../../middlewares/auth/authMiddleware.js'
 const router = express.Router();
 
-router.get("/pay", initiatePayment);
+router.post("/pay", initiatePayment);
 
 // Route to validate payment
 // router.get("/validate/:merchantTransactionId", validatePayment);
