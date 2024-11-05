@@ -74,7 +74,7 @@ export const initiatePayment = async (req, res) => {
 
 
 export const validatePayment = async (req, res) => {
-  const { merchantTransactionId, userId } = req.params; // Since we're now passing it in the URL params
+  const { merchantTransactionId, userId } = req.body; // Since we're now passing it in the URL params
   console.log("userId and merchantTransactionId:", userId, merchantTransactionId);
   if (!merchantTransactionId) {
     return res.status(400).send("Invalid transaction ID");

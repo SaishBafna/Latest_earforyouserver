@@ -8,8 +8,8 @@ const router = express.Router();
 router.post("/pay", initiatePayment);
 
 // Route to validate payment
-// router.get("/validate/:merchantTransactionId", validatePayment);
-router.get("/validate/:merchantTransactionId/:userId", validatePayment);
+router.get("/validate", protect,validatePayment);
+// router.get("/validate/:merchantTransactionId/:userId", validatePayment);
 
 
 // router.post('/verify-payment', verifyPayment);
