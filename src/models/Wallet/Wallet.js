@@ -22,6 +22,18 @@ const walletSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      merchantTransactionId:{
+        type: String,
+        required: true,
+      },
+      state:{
+        type: String,
+        required: true,
+      },
+      responseCode:{
+        type: String,
+        required: true,
+      },
       rechargeMethod: {
         type: String,
         required: true,
