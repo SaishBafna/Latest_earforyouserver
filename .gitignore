@@ -3,3 +3,4 @@ node_modules
 echo "src/config/serviceAccountKey.json" >> .gitignore
 git add .gitignore
 git commit -m "Remove service account credentials and add to .gitignore"
+src/config/serviceAccountKey.json
