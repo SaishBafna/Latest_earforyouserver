@@ -5,8 +5,8 @@ import sendNotification from '../utils/sendNotification.js';
 import User from '../models/Users.js';
 import Wallet from '../models/Wallet/Wallet.js'
 
-  
- export const setupWebRTC = (io) => {
+
+export const setupWebRTC = (io) => {
   // Store active users and their socket connections
   const users = {}; // { userId: [socketId1, socketId2, ...] }
   const activeCalls = {}; // { userId: otherUserId }
@@ -22,26 +22,26 @@ import Wallet from '../models/Wallet/Wallet.js'
       logger.info(`User ${userId} joined with socket ID ${socket.id}`);
     });
 
-    
-     // Handle random call request
-     socket.on('requestRandomCall', async ({ userId }) => {
+
+    // Handle random call request
+    socket.on('requestRandomCall', async ({ userId }) => {
       try {
         logger.info(`User ${userId} requesting random call`);
-    
+
         // Check if user is already in a call
         if (activeCalls[userId]) {
           socket.emit('callError', { message: 'You are already in a call' });
           return;
         }
-    
+
         // Check if user is already in queue
         if (randomCallQueue.has(userId)) {
           socket.emit('callError', { message: 'You are already in random call queue' });
           return;
         }
-    
+
         // Get all available users (excluding the requester and users in calls)
-        const allAvailableUsers = Object.keys(users).filter(potentialUserId => 
+        const allAvailableUsers = Object.keys(users).filter(potentialUserId =>
           potentialUserId !== userId && // Not the requesting user
           !activeCalls[potentialUserId] && // Not in a call
           users[potentialUserId]?.length > 0 && // Has active socket connections
@@ -61,29 +61,29 @@ import Wallet from '../models/Wallet/Wallet.js'
           // Match with a random available user
           const randomIndex = Math.floor(Math.random() * allAvailableUsers.length);
           const matchedUserId = allAvailableUsers[randomIndex];
-    
+
           // Get user details for both parties
           const [caller, receiver] = await Promise.all([
             User.findById(userId),
             User.findById(matchedUserId)
           ]);
-    
+
           if (!caller || !receiver) {
             socket.emit('callError', { message: 'Failed to match users' });
             return;
           }
-    
+
           // Set active call status
           activeCalls[userId] = matchedUserId;
           activeCalls[matchedUserId] = userId;
-    
+
           // Notify the caller about the match
-          socket.emit('randomCallMatched', { 
+          socket.emit('randomCallMatched', {
             matchedUserId: matchedUserId,
             matchedUsername: receiver.username,
             socketId: socket.id
           });
-    
+
           // Notify the matched user about incoming call
           users[matchedUserId].forEach((receiverSocketId) => {
             socket.to(receiverSocketId).emit('incomingRandomCall', {
@@ -93,7 +93,7 @@ import Wallet from '../models/Wallet/Wallet.js'
             });
 
           });
-    
+
           // Send push notification if receiver has a device token
           if (receiver.deviceToken) {
             const title = 'Random Call';
@@ -101,39 +101,39 @@ import Wallet from '../models/Wallet/Wallet.js'
             await sendNotification(receiver.deviceToken, title, message);
             logger.info(`Push notification sent to User ${matchedUserId}`);
           }
-    
+
           logger.info(`Random call matched: ${userId} with ${matchedUserId}`);
-          
+
           // Set a timeout for call acceptance
           setTimeout(async () => {
             // If call wasn't accepted/rejected, clean up
             if (activeCalls[userId] === matchedUserId) {
               delete activeCalls[userId];
               delete activeCalls[matchedUserId];
-              
+
               socket.emit('callError', { message: 'Call request timed out' });
               users[matchedUserId]?.forEach((receiverSocketId) => {
                 socket.to(receiverSocketId).emit('callEnded', { callerId: userId });
               });
-              
+
               logger.info(`Random call timed out between ${userId} and ${matchedUserId}`);
             }
           }, 30000); // 30 seconds timeout
-    
+
         } else {
           // Add user to queue if no users available
           randomCallQueue.add(userId);
-          socket.emit('waitingForRandomMatch', { 
-            message: 'Waiting for another user to connect' 
+          socket.emit('waitingForRandomMatch', {
+            message: 'Waiting for another user to connect'
           });
           logger.info(`User ${userId} added to random call queue`);
-    
+
           // Set a timeout for queue waiting
           setTimeout(() => {
             if (randomCallQueue.has(userId)) {
               randomCallQueue.delete(userId);
-              socket.emit('randomCallTimeout', { 
-                message: 'No users available for random call. Please try again later.' 
+              socket.emit('randomCallTimeout', {
+                message: 'No users available for random call. Please try again later.'
               });
               logger.info(`User ${userId} removed from queue due to timeout`);
             }
@@ -144,17 +144,17 @@ import Wallet from '../models/Wallet/Wallet.js'
         socket.emit('callError', { message: 'Failed to process random call request' });
       }
     });
-    
+
     // Handle random call acceptance
     socket.on('acceptRandomCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} accepted random call from User ${callerId}`);
-    
+
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
-            socket.to(socketId).emit('randomCallAccepted', { 
-              receiverId, 
-              socketId: socket.id 
+            socket.to(socketId).emit('randomCallAccepted', {
+              receiverId,
+              socketId: socket.id
             });
           });
         }
@@ -163,23 +163,23 @@ import Wallet from '../models/Wallet/Wallet.js'
         socket.emit('callError', { message: 'Failed to accept random call' });
       }
     });
-    
+
     // Handle random call rejection
     socket.on('rejectRandomCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} rejected random call from User ${callerId}`);
-    
+
         // Clean up call status
         delete activeCalls[callerId];
         delete activeCalls[receiverId];
-    
+
         // Notify caller about rejection
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
             socket.to(socketId).emit('randomCallRejected', { receiverId });
           });
         }
-    
+
         // Create call log
         await CallLog.create({
           caller: new mongoose.Types.ObjectId(callerId),
@@ -199,8 +199,8 @@ import Wallet from '../models/Wallet/Wallet.js'
     socket.on('cancelRandomCall', ({ userId }) => {
       if (randomCallQueue.has(userId)) {
         randomCallQueue.delete(userId);
-        socket.emit('randomCallCancelled', { 
-          message: 'Random call request cancelled' 
+        socket.emit('randomCallCancelled', {
+          message: 'Random call request cancelled'
         });
         logger.info(`User ${userId} cancelled random call request`);
       }
@@ -240,9 +240,9 @@ import Wallet from '../models/Wallet/Wallet.js'
         if (users[receiverId].length > 0) {
           // Emit incoming call to all receiver's sockets
           users[receiverId].forEach((socketId) => {
-            socket.to(socketId).emit('incomingCall', { 
-              callerId, 
-              socketId: socket.id 
+            socket.to(socketId).emit('incomingCall', {
+              callerId,
+              socketId: socket.id
             });
           });
 
@@ -323,11 +323,15 @@ import Wallet from '../models/Wallet/Wallet.js'
       try {
         logger.info(`User ${receiverId} accepted call from User ${callerId}`);
 
+        activeCalls[callerId] = { receiverId, startTime: new Date() };
+        activeCalls[receiverId] = { callerId, startTime: new Date() };
+
+
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
-            socket.to(socketId).emit('callAccepted', { 
-              receiverId, 
-              socketId: socket.id 
+            socket.to(socketId).emit('callAccepted', {
+              receiverId,
+              socketId: socket.id
             });
           });
 
@@ -391,10 +395,11 @@ import Wallet from '../models/Wallet/Wallet.js'
           delete activeCalls[callerId];
           delete activeCalls[receiverId];
 
-          // Create call log
+          // Retrieve the startTime
+          const startTime = activeCalls[callerId].startTime;
           const endTime = new Date();
-          const startTime = new Date(endTime - 1000); // Placeholder, adjust based on your needs
-          const duration = Math.floor((endTime - startTime) / 1000);
+          const duration = Math.floor((endTime - startTime) / 1000); // Duration in seconds
+
 
           await CallLog.create({
             caller: new mongoose.Types.ObjectId(callerId),
@@ -421,7 +426,7 @@ import Wallet from '../models/Wallet/Wallet.js'
         if (index !== -1) {
           socketIds.splice(index, 1);
           disconnectedUserId = userId;
-          
+
           // Remove user entry if no sockets left
           if (socketIds.length === 0) {
             delete users[userId];
@@ -435,8 +440,8 @@ import Wallet from '../models/Wallet/Wallet.js'
         const otherUserId = activeCalls[disconnectedUserId];
         if (users[otherUserId]) {
           users[otherUserId].forEach((socketId) => {
-            socket.to(socketId).emit('callEnded', { 
-              callerId: disconnectedUserId 
+            socket.to(socketId).emit('callEnded', {
+              callerId: disconnectedUserId
             });
           });
         }
