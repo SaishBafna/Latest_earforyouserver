@@ -143,6 +143,7 @@ export const validatePayment = async (req, res) => {
       // lastUpdated will be automatically updated by the pre-save hook
 
       await wallet.save();
+      await sendNotification(userId, "Payment Successful", `Your wallet has been credited with ₹${newRecharge.amount}. New balance: ₹${wallet.balance}.`);
 
       return res.status(200).send({ 
         success: true, 
