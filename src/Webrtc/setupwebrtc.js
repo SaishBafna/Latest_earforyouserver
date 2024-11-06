@@ -91,6 +91,7 @@ import Wallet from '../models/Wallet/Wallet.js'
               callerUsername: caller.username,
               socketId: socket.id
             });
+
           });
     
           // Send push notification if receiver has a device token
