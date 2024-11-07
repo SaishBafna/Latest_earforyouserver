@@ -1,9 +1,13 @@
 import mongoose from 'mongoose';
 import CallLog from '../models/Talk-to-friend/callLogModel.js';
 import logger from '../logger/winston.logger.js';
-import sendNotification from '../utils/sendNotification.js';
+
 import User from '../models/Users.js';
 import Wallet from '../models/Wallet/Wallet.js'
+import admin from 'firebase-admin';
+
+
+
 
 
 export const setupWebRTC = (io) => {
@@ -84,6 +88,8 @@ export const setupWebRTC = (io) => {
             socketId: socket.id
           });
 
+
+
           // Notify the matched user about incoming call
           users[matchedUserId].forEach((receiverSocketId) => {
             socket.to(receiverSocketId).emit('incomingRandomCall', {
@@ -95,13 +101,9 @@ export const setupWebRTC = (io) => {
           });
 
           // Send push notification if receiver has a device token
-          if (receiver.deviceToken) {
-            const title = 'Random Call';
-            const message = `${caller.username} wants to connect with you!`;
-            await sendNotification(receiver.deviceToken, title, message);
-            logger.info(`Push notification sent to User ${matchedUserId}`);
-          }
-
+         
+          await sendNotification(userId, "Random call matched", `${caller.username} wants to connect with you!`);
+          
           logger.info(`Random call matched: ${userId} with ${matchedUserId}`);
 
           // Set a timeout for call acceptance
@@ -453,3 +455,31 @@ export const setupWebRTC = (io) => {
   });
 };
 
+
+
+
+async function sendNotification(userId, title, message) {
+  // Assuming you have the FCM device token stored in your database
+  const user = await User.findById(userId);
+  const deviceToken = user.deviceToken;
+
+  if (!deviceToken) {
+    console.error("No device token found for user:", userId);
+    return;
+  }
+
+  const payload = {
+    notification: {
+      title: title,
+      body: message,
+    },
+    token: deviceToken,
+  };
+
+  try {
+    const response = await admin.messaging().send(payload);
+    console.log("Notification sent successfully:", response);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+}
