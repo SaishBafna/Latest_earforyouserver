@@ -368,12 +368,12 @@ export const setupWebRTC = (io) => {
       try {
         logger.info(`User ${receiverId} accepted call from User ${callerId}`);
     
-        // Store start time using process.hrtime()
+        // Store start time as a Date object
         const callKey = `${receiverId}_${callerId}`;
         logger.info(`callKey ${callKey}`);
     
         callTimings[callKey] = {
-          startTime: process.hrtime() // Start time in seconds and nanoseconds
+          startTime: new Date() // Start time as a Date object
         };
     
         // Notify the caller that the call has been accepted
@@ -466,7 +466,7 @@ export const setupWebRTC = (io) => {
     //   }
     // });
 
-    
+
     socket.on('endCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`Call ended between ${callerId} and ${receiverId}`);
@@ -479,32 +479,26 @@ export const setupWebRTC = (io) => {
             });
           }
     
-          // Calculate call duration using process.hrtime()
+          // Calculate call duration
           const callKey = `${callerId}_${receiverId}`;
-          logger.info(`callKey ${callKey}`);
-    
-          const call_time = callTimings[callKey].startTime;
-          logger.info(`Call ended with time ${call_time}`);
-    
-          const endTime = process.hrtime(callTimings[callKey].startTime); // High precision difference
-          let duration = endTime[0] + (endTime[1] / 1000000000); // Convert to seconds
+          const startTime = callTimings[callKey].startTime;
+          const endTime = new Date();
+          const duration = (endTime - startTime) / 1000; // Calculate duration in seconds
     
           // Log the call with duration
           await CallLog.create({
             caller: new mongoose.Types.ObjectId(callerId),
             receiver: new mongoose.Types.ObjectId(receiverId),
-            startTime: new Date(callTimings[callKey].startTime[0] * 1000 + callTimings[callKey].startTime[1] / 1000000),
-            endTime: new Date(),
+            startTime,
+            endTime,
             duration,
             status: 'completed'
           });
     
-          // Clean up call timing
-          delete callTimings[callKey];
+          // Clean up call status
           delete activeCalls[callerId];
           delete activeCalls[receiverId];
-    
-          logger.info(`Call logged with duration: ${duration.toFixed(2)} seconds`);
+          delete callTimings[callKey];
         }
       } catch (error) {
         logger.error(`Error in endCall handler: ${error.message}`);
