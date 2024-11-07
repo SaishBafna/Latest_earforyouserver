@@ -151,7 +151,29 @@ export const setupWebRTC = (io) => {
     socket.on('acceptRandomCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} accepted random call from User ${callerId}`);
-
+        
+        // Store call data with proper structure
+        const callData = {
+          receiverId,
+          startTime: new Date(),
+          isActive: true,
+          type: 'random'
+        };
+        
+        activeCalls[callerId] = callData;
+        activeCalls[receiverId] = {
+          callerId,
+          startTime: callData.startTime,
+          isActive: true,
+          type: 'random'
+        };
+    
+        logger.info(`Random call data stored: `, { 
+          callerId, 
+          receiverId, 
+          callData: activeCalls[callerId]
+        });
+    
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
             socket.to(socketId).emit('randomCallAccepted', {
@@ -326,11 +348,27 @@ export const setupWebRTC = (io) => {
     socket.on('acceptCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} accepted call from User ${callerId}`);
-
-        activeCalls[callerId] = { receiverId, startTime: new Date() };
-        activeCalls[receiverId] = { callerId, startTime: new Date() };
-
-
+    
+        // Store call data with proper structure
+        const callData = {
+          receiverId,
+          startTime: new Date(),
+          isActive: true
+        };
+        
+        activeCalls[callerId] = callData;
+        activeCalls[receiverId] = {
+          callerId,
+          startTime: callData.startTime,
+          isActive: true
+        };
+    
+        logger.info(`Call data stored: `, { 
+          callerId, 
+          receiverId, 
+          callData: activeCalls[callerId]
+        });
+    
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
             socket.to(socketId).emit('callAccepted', {
@@ -338,7 +376,7 @@ export const setupWebRTC = (io) => {
               socketId: socket.id
             });
           });
-
+    
           // Stop caller tune
           socket.emit('stopCallerTune', { callerId });
         }
@@ -347,7 +385,6 @@ export const setupWebRTC = (io) => {
         socket.emit('callError', { message: 'Failed to accept call' });
       }
     });
-
     // Handle call rejection
     socket.on('rejectCall', async ({ receiverId, callerId }) => {
       try {
@@ -385,50 +422,70 @@ export const setupWebRTC = (io) => {
     // Handle call end
     socket.on('endCall', async ({ receiverId, callerId }) => {
       try {
-        logger.info(`Call ended between ${callerId} and ${receiverId}`);
+        logger.info(`Attempting to end call between ${callerId} and ${receiverId}`);
+        logger.info('Current active calls:', activeCalls);
     
-        // Get call data before cleaning up
-        const callData = activeCalls[callerId];
+        const callerData = activeCalls[callerId];
         
-        if (callData && callData.receiverId === receiverId) {
-          // Notify the other party
-          if (users[receiverId]) {
-            users[receiverId].forEach((socketId) => {
-              socket.to(socketId).emit('callEnded', { callerId });
-            });
-          }
-    
-          // Get start time before cleanup
-          const startTime = callData.startTime;
-          const endTime = new Date();
-          const duration = Math.floor((endTime - startTime) / 1000); // Duration in seconds
-    
-          // Clean up call status
-          delete activeCalls[callerId];
-          delete activeCalls[receiverId];
-    
-          // Helper function to format time to hh:mm:ss
-          const formatTime = (date) => {
-            return date.toLocaleTimeString('en-US', { hour12: false }); // Format as hh:mm:ss
-          };
-    
-          // Store the call log with formatted times
-          await CallLog.create({
-            caller: new mongoose.Types.ObjectId(callerId),
-            receiver: new mongoose.Types.ObjectId(receiverId),
-            startTime: formatTime(startTime),
-            endTime: formatTime(endTime),
-            duration,
-            status: 'completed'
-          });
-    
-          logger.info(`Call log created for call between ${callerId} and ${receiverId}`);
-        } else {
-          logger.warn(`No active call found between ${callerId} and ${receiverId}`);
+        if (!callerData) {
+          logger.warn(`No active call found for caller ${callerId}`);
+          return;
         }
+    
+        if (callerData.receiverId !== receiverId) {
+          logger.warn(`Receiver mismatch. Expected: ${callerData.receiverId}, Got: ${receiverId}`);
+          return;
+        }
+    
+        if (!callerData.isActive) {
+          logger.warn(`Call is not in active state for caller ${callerId}`);
+          return;
+        }
+    
+        // Mark call as inactive before cleanup
+        callerData.isActive = false;
+        if (activeCalls[receiverId]) {
+          activeCalls[receiverId].isActive = false;
+        }
+    
+        // Calculate duration and create log
+        const startTime = callerData.startTime;
+        const endTime = new Date();
+        const duration = Math.floor((endTime - startTime) / 1000);
+    
+        // Helper function to format time
+        const formatTime = (date) => {
+          return date.toLocaleTimeString('en-US', { hour12: false });
+        };
+    
+        // Create call log
+        const callLog = await CallLog.create({
+          caller: new mongoose.Types.ObjectId(callerId),
+          receiver: new mongoose.Types.ObjectId(receiverId),
+          startTime: formatTime(startTime),
+          endTime: formatTime(endTime),
+          duration,
+          status: 'completed'
+        });
+    
+        logger.info(`Call log created successfully:, callLog`);
+    
+        // Notify the other party
+        if (users[receiverId]) {
+          users[receiverId].forEach((socketId) => {
+            socket.to(socketId).emit('callEnded', { callerId });
+          });
+        }
+    
+        // Clean up call status
+        delete activeCalls[callerId];
+        delete activeCalls[receiverId];
+    
+        logger.info(`Call ended successfully between ${callerId} and ${receiverId}`);
       } catch (error) {
         logger.error(`Error in endCall handler: ${error.message}`);
-        logger.error(error.stack); // Add stack trace for better debugging
+        logger.error(error.stack);
+        socket.emit('callError', { message: 'Failed to end call properly' });
       }
     });
 
