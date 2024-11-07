@@ -169,9 +169,14 @@ export const setupWebRTC = (io) => {
 
         // Store call start time
         const callKey = `${callerId}_${receiverId}`;
+        logger.info(`callKey ${callKey}`);
+
         callTimings[callKey] = {
           startTime: new Date()
         };
+
+        logger.info(`callTimings ${callTimings[callKey]}`);
+
 
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
@@ -367,10 +372,14 @@ export const setupWebRTC = (io) => {
     
         // Store start time using process.hrtime()
         const callKey = `${callerId}_${receiverId}`;
+        logger.info(`callKey ${callKey}`);
+
         callTimings[callKey] = {
           startTime: process.hrtime() // Start time in seconds and nanoseconds
         };
-    
+        
+        logger.info(`callTimings ${callTimings[callKey]}`);
+
         // Notify the caller that the call has been accepted
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
