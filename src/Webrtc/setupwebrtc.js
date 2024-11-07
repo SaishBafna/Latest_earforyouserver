@@ -489,7 +489,7 @@ export const setupWebRTC = (io) => {
           logger.info(`Call ended with time ${call_time}`);
 
           const endTime = process.hrtime(callTimings[callKey].startTime); // High precision difference
-          let duration = (endTime[0] * 1000) + (endTime[1] / 1000000); // Convert to milliseconds
+          let duration = endTime[0] + (endTime[1] / 1000000000); // Convert to seconds
     
           
           // Log the call with duration
