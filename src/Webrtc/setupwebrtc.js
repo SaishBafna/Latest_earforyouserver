@@ -364,22 +364,23 @@ export const setupWebRTC = (io) => {
     socket.on('acceptCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} accepted call from User ${callerId}`);
-
-        // Store call start time
+    
+        // Store start time using process.hrtime()
         const callKey = `${callerId}_${receiverId}`;
         callTimings[callKey] = {
-          startTime: new Date()
+          startTime: process.hrtime() // Start time in seconds and nanoseconds
         };
-
+    
+        // Notify the caller that the call has been accepted
         if (users[callerId]) {
           users[callerId].forEach((socketId) => {
             socket.to(socketId).emit('callAccepted', { 
               receiverId, 
-              socketId: socket.id 
+              socketId: socket.id
             });
           });
-
-          // Stop caller tune
+    
+          // Stop the caller's tune after call acceptance
           socket.emit('stopCallerTune', { callerId });
         }
       } catch (error) {
@@ -387,6 +388,9 @@ export const setupWebRTC = (io) => {
         socket.emit('callError', { message: 'Failed to accept call' });
       }
     });
+    
+    
+    
     // Handle call rejection
     socket.on('rejectCall', async ({ receiverId, callerId }) => {
       try {
@@ -456,12 +460,10 @@ export const setupWebRTC = (io) => {
     //     logger.error(`Error in endCall handler: ${error.message}`);
     //   }
     // });
-
-
     socket.on('endCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`Call ended between ${callerId} and ${receiverId}`);
-
+    
         if (activeCalls[callerId] === receiverId) {
           // Notify the other party
           if (users[receiverId]) {
@@ -469,41 +471,34 @@ export const setupWebRTC = (io) => {
               socket.to(socketId).emit('callEnded', { callerId });
             });
           }
-
-          // Calculate call duration
+    
+          // Calculate call duration using process.hrtime()
           const callKey = `${callerId}_${receiverId}`;
-          const endTime = new Date();
-          let startTime = endTime; // Default to endTime if no start time found
-          let duration = 0;
-
-          if (callTimings[callKey]) {
-            startTime = callTimings[callKey].startTime;
-            duration = Math.floor((endTime - startTime) / 1000); // Duration in seconds
-
-            // Clean up call timing
-            delete callTimings[callKey];
-          }
-
-          // Clean up call status
+          const endTime = process.hrtime(callTimings[callKey].startTime); // High precision difference
+          let duration = (endTime[0] * 1000) + (endTime[1] / 1000000); // Convert to milliseconds
+    
+          // Clean up call timing
+          delete callTimings[callKey];
           delete activeCalls[callerId];
           delete activeCalls[receiverId];
-
-          // Create call log with accurate duration
+    
+          // Log the call with duration
           await CallLog.create({
             caller: new mongoose.Types.ObjectId(callerId),
             receiver: new mongoose.Types.ObjectId(receiverId),
-            startTime,
-            endTime,
+            startTime: new Date(callTimings[callKey].startTime[0] * 1000 + callTimings[callKey].startTime[1] / 1000000),
+            endTime: new Date(),
             duration,
             status: 'completed',
           });
-
-          logger.info(`Call logged with duration: ${duration} seconds`);
+    
+          logger.info(`Call logged with duration: ${duration.toFixed(2)} milliseconds`);
         }
       } catch (error) {
         logger.error(`Error in endCall handler: ${error.message}`);
       }
     });
+
 
 
     // Handle disconnection
