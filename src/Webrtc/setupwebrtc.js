@@ -192,6 +192,8 @@ export const setupWebRTC = (io) => {
           status: 'rejected',
           callType: 'random'
         });
+
+        
       } catch (error) {
         logger.error(`Error in rejectRandomCall handler: ${error.message}`);
         socket.emit('callError', { message: 'Failed to reject random call' });
