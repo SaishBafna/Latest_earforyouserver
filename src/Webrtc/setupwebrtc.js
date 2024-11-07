@@ -499,7 +499,7 @@ export const setupWebRTC = (io) => {
           // Clean up call status
           delete activeCalls[callerId];
           delete activeCalls[receiverId];
-          delete callTimings[callKey];
+          delete callTimings[callerCallKey]?.startTime || callTimings[receiverCallKey]?.startTime;
         }
       } catch (error) {
         logger.error(`Error in endCall handler: ${error.message}`);
