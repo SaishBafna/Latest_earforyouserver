@@ -11,7 +11,6 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose'
 import admin from 'firebase-admin';
 
-import { dropPhoneIndex } from "../../dropPhoneIndex.js";
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -212,7 +211,7 @@ export const initiateRegistration = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      
     }
 
     // Generate OTP and set expiry (valid for 1 hour)
@@ -282,39 +281,6 @@ export const initiateLogin = async (req, res) => {
 };
 
 
-export const resendOtp = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    // Check if the user exists
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Check if the OTP expired
-    if (user.otpExpires < Date.now()) {
-      return res.status(400).json({ message: "OTP has expired, please request a new one" });
-    }
-
-    // Generate a new OTP and set a new expiry
-    const otp = generateOtp();
-    user.otp = otp;
-    user.otpExpires = Date.now() + 3600000; // OTP valid for 1 hour
-
-    // Save new OTP details to user
-    await user.save();
-
-    // Send new OTP to the user's email
-    await sendOtpEmail(email, otp);
-
-    res.status(200).json({ message: "OTP resent to email" });
-  } catch (error) {
-    console.error("Error during OTP resend:", error);
-    res.status(500).json({ message: "Server error", error });
-  }
-};
 
 
 //-----------------verifyRegistrationOtp-------------------
@@ -353,7 +319,7 @@ export const verifyRegistrationOtp = async (req, res) => {
 //---------------verifyLoginOtp--------------------
 
 export const verifyLoginOtp = async (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp,deviceToken } = req.body;
 
   try {
     // Find user by email
@@ -377,6 +343,14 @@ export const verifyLoginOtp = async (req, res) => {
 
     // Generate JWT or session token for authenticated user
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+
+     // Update device token if provided
+     if (deviceToken) {
+      user.deviceToken = deviceToken;
+      user.platform = platform || user.platform; // Use provided platform or keep the existing one
+      await user.save();
+    }
 
     res.status(200).json({ 
       message: "Login successful", 
@@ -491,10 +465,11 @@ export const updateOrCreateUserCategory = async (req, res) => {
 };
 
 // ------------------------useruserController.js---------------------------------------
+
 export const updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { username, dateOfBirth, gender, Language } = req.body;
+    const { username, dateOfBirth, gender, Language,phone } = req.body;
 
     // Validation
     if (username && typeof username !== 'string') {
@@ -516,6 +491,7 @@ export const updateProfile = async (req, res) => {
         dateOfBirth,
         Language,
         gender,
+        phone
         // Add other required fields as necessary
       });
 
@@ -534,6 +510,7 @@ export const updateProfile = async (req, res) => {
       ...(dateOfBirth && { dateOfBirth }),
       ...(gender && { gender }),
       ...(Language && { Language }),
+      ...(phone && { phone }),
     };
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
@@ -549,6 +526,8 @@ export const updateProfile = async (req, res) => {
   }
 };
 //--------------------------Update User Avatra-----------------------------------------
+
+
 
 // ------------------------userController.js---------------------------------------
 export const updateDeviceToken = async (req, res) => {

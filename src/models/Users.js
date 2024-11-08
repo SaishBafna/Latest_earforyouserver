@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       required:false,
+      required: false, // phone is optional
+      sparse: true,
       trim: true,
     },
     dateOfBirth: {
@@ -33,7 +35,11 @@ const userSchema = new mongoose.Schema(
     password:{
       type:String,
     },
-    
+    referalCode:{
+      type : String,
+      unique:true,
+    },
+
     gender: {
       type: String,
       enum: ['male', 'female', 'other'], // Enum for gender values
