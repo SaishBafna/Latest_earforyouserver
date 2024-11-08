@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: false, // phone is optional
+      sparse: true,
       trim: true,
       unique: true, // Add unique constraint, but with optional behavior
     },
