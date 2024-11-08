@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose'
 import admin from 'firebase-admin';
 
-
+import { dropPhoneIndex } from "../../dropPhoneIndex.js";
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -209,10 +209,6 @@ export const initiateRegistration = async (req, res) => {
 
   try {
     // Check if the user already exists
-
-    
-
-    
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
