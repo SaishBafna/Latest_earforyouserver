@@ -5,32 +5,60 @@ import User from '../../models/Users.js';
 
 
 
-export const getRecentCalls = async (req, res) => {
-    try {
-      const { callerId } = req.params; // Assuming you pass callerId in the request parameters
+// export const getRecentCalls = async (req, res) => {
+//     try {
+//       const { callerId } = req.params; // Assuming you pass callerId in the request parameters
   
-      console.log('Fetching calls for callerId:', callerId);
+//       console.log('Fetching calls for callerId:', callerId);
   
-      // Retrieve recent call logs, sorting by the most recent calls first
-      const recentCalls = await CallLog.find({ callerId })
-        .sort({ createdAt: -1 }) // Sorting by the `createdAt` field in descending order (most recent first)
-        .limit(10)
-        .populate('callerId') // Populate the full caller's user details from the User model
-        .populate('receiverId')
-        .exec(); // Ensure the query is executed
+//       // Retrieve recent call logs, sorting by the most recent calls first
+//       const recentCalls = await CallLog.find({ callerId })
+//         .sort({ createdAt: -1 }) // Sorting by the `createdAt` field in descending order (most recent first)
+//         .limit(10)
+//         .populate(callerId)
+//         .exec(); 
   
-      if (recentCalls.length === 0) {
-        return res.status(404).json({ message: 'No call history found.' });
-      }
+//       if (recentCalls.length === 0) {
+//         return res.status(404).json({ message: 'No call history found.' });
+//       }
   
-      return res.status(200).json({ recentCalls });
-    } catch (error) {
-      console.error('Error fetching recent call history:', error); // Corrected typo
-      return res.status(500).json({ message: 'Server error, unable to fetch call history.' });
-    }
- };
+//       return res.status(200).json({ recentCalls });
+//     } catch (error) {
+//       console.error('Error fetching recent call history:', error); // Corrected typo
+//       return res.status(500).json({ message: 'Server error, unable to fetch call history.' });
+//     }
+//   };
   
 
+
+
+
+export const getRecentCalls = async (req, res) => {
+  try {
+    const { userId } = req.params; // Assuming userId is passed as a request parameter
+
+    console.log('Fetching calls for userId:', userId);
+
+    // Retrieve recent call logs where the user is either the caller or the receiver
+    const recentCalls = await CallLog.find({
+      $or: [{ caller: userId }, { receiver: userId }],
+    })
+      .sort({ startTime: -1 }) // Sorting by `startTime` in descending order (most recent first)
+      .limit(10)
+      .populate('caller', 'username userType userCategory phone ') // Populate the caller's user details from User model
+      .populate('receiver', 'username userType userCategory phone ') // Populate the receiver's user details from User model
+      .exec(); // Ensure the query is executed
+
+    if (recentCalls.length === 0) {
+      return res.status(404).json({ message: 'No call history found.' });
+    }
+
+    return res.status(200).json({ recentCalls });
+  } catch (error) {
+    console.error('Error fetching recent call history:', error);
+    return res.status(500).json({ message: 'Server error, unable to fetch call history.' });
+  }
+};
 
 
 

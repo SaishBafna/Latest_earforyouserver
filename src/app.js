@@ -118,7 +118,7 @@ app.get("/", (req, res) => {
 
 app.use('/api/v1/msg91', msg91Routes);
 
-app.use('/api/v1/', CallRoute);
+app.use('/api/v1', CallRoute);
 
 
 //authRoutes
