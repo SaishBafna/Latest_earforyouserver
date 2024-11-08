@@ -252,7 +252,7 @@ export const initiateRegistration = async (req, res) => {
 //----------------initiateLogin---------------
 
 
-export const initiateLogin = async (email) => {
+export const initiateLogin = async (res, email) => {
   // const { email } = req.body;
 
   try {
