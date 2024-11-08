@@ -211,7 +211,7 @@ export const initiateRegistration = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      
+      return await initiateLogin(email)
     }
 
     // Generate OTP and set expiry (valid for 1 hour)
@@ -252,8 +252,8 @@ export const initiateRegistration = async (req, res) => {
 //----------------initiateLogin---------------
 
 
-export const initiateLogin = async (req, res) => {
-  const { email } = req.body;
+export const initiateLogin = async (email) => {
+  // const { email } = req.body;
 
   try {
     // Check if the user exists
