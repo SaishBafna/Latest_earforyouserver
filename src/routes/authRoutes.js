@@ -13,8 +13,6 @@ import {
     getAllUsers,
     registerUser,
     initiateRegistration,
-    verifyRegistrationOtp,
-    initiateLogin,
     verifyLoginOtp
 } from '../controllers/authController.js';
 // import { validateUserSignup } from '../middlewares/auth/validators.js';
@@ -59,13 +57,9 @@ router.delete('/deleteUser', protect, deleteUser);
 
 
 
-router.post('/register/initiate', initiateRegistration);
-
-// Verify the registration OTP
-router.post('/register/verify', verifyRegistrationOtp);
+router.post('/initiate/registration', initiateRegistration);
 
 // Initiate login by sending OTP to email
-router.post('/login/initiate', initiateLogin);
 
 // Verify the login OTP
 router.post('/login/verify', verifyLoginOtp);
