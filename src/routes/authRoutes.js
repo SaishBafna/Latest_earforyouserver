@@ -1,17 +1,21 @@
 import express from 'express';
-import { 
+import {
     getUserById,
-     logoutUser,
-     requestOTP, 
-    verifyOTP,   
-     updateDeviceToken,
-     changeUserType ,
-     updateProfile,
-     updateOrCreateUserCategory,
-     deleteUser,
-     authUser,
-     getAllUsers,
-     registerUser
+    logoutUser,
+    requestOTP,
+    verifyOTP,
+    updateDeviceToken,
+    changeUserType,
+    updateProfile,
+    updateOrCreateUserCategory,
+    deleteUser,
+    authUser,
+    getAllUsers,
+    registerUser,
+    initiateRegistration,
+    verifyRegistrationOtp,
+    initiateLogin,
+    verifyLoginOtp
 } from '../controllers/authController.js';
 // import { validateUserSignup } from '../middlewares/auth/validators.js';
 import { protect } from '../middlewares/auth/authMiddleware.js'
@@ -47,10 +51,23 @@ router.post('/verify-otp', verifyOTP);
 
 router.get('/user/:userId', getUserById);
 
-router.get('/users',protect, getAllUsers);
+router.get('/users', protect, getAllUsers);
 // Delete User
-router.delete('/deleteUser',protect, deleteUser);
+router.delete('/deleteUser', protect, deleteUser);
 
 
+
+
+
+router.post('/register/initiate', initiateRegistration);
+
+// Verify the registration OTP
+router.post('/register/verify', verifyRegistrationOtp);
+
+// Initiate login by sending OTP to email
+router.post('/login/initiate', initiateLogin);
+
+// Verify the login OTP
+router.post('/login/verify', verifyLoginOtp);
 
 export default router;

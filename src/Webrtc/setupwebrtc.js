@@ -106,22 +106,6 @@ export const setupWebRTC = (io) => {
 
           logger.info(`Random call matched: ${userId} with ${matchedUserId}`);
 
-          // Set a timeout for call acceptance
-          setTimeout(async () => {
-            // If call wasn't accepted/rejected, clean up
-            if (activeCalls[userId] === matchedUserId) {
-              delete activeCalls[userId];
-              delete activeCalls[matchedUserId];
-
-              socket.emit('callError', { message: 'Call request timed out' });
-              users[matchedUserId]?.forEach((receiverSocketId) => {
-                socket.to(receiverSocketId).emit('callEnded', { callerId: userId });
-              });
-
-              logger.info(`Random call timed out between ${userId} and ${matchedUserId}`);
-            }
-          }, 30000); // 30 seconds timeout
-
         } else {
           // Add user to queue if no users available
           randomCallQueue.add(userId);

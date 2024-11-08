@@ -23,8 +23,8 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
-      unique: true,
+      required:false,
+      unique: false,
       trim: true,
     },
     dateOfBirth: {
@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
     userCategory: {
       type: String,
       enum: ["Doctor", "Therapist", "Healer", "Psychologist"],
+    },
+    email:{
+      type: String,
+      unique:true
     },
     userType: {
       type: String,

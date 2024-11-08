@@ -200,6 +200,155 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
+
+//-----------------initiateRegistration-------------------
+
+
+export const initiateRegistration = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Generate OTP and set expiry (valid for 1 hour)
+    const otp = generateOtp();
+    const otpExpires = Date.now() + 3600000; // 1 hour expiry
+
+    // Send OTP to the provided email
+    const otpSent = await sendOtpEmail(email, otp);
+
+    // Check if OTP was successfully sent
+    if (!otpSent) {
+      return res.status(500).json({ message: "Failed to send OTP" });
+    }
+
+    // Create new user with OTP and expiration after successful OTP sending
+    const newUser = new User({
+      email,
+      otp,
+      otpExpires,
+    });
+
+    // Save user with OTP and expiration
+    await newUser.save();
+
+    res.status(200).json({ message: "OTP sent to email for registration" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+
+//-----------------verifyRegistrationOtp-------------------
+
+export const verifyRegistrationOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify OTP and check expiration
+    if (user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Clear OTP fields after successful verification
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    // Mark the user as fully registered (could add additional fields here if needed)
+    await user.save();
+
+    res.status(200).json({ message: "Registration completed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+
+
+//----------------initiateLogin---------------
+
+
+export const initiateLogin = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate OTP and set expiry
+    const otp = generateOtp();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 3600000; // OTP valid for 1 hour
+
+    // Save OTP details to user
+    await user.save();
+
+    // Send OTP to the user's email
+    await sendOtpEmail(email, otp);
+
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+//---------------verifyLoginOtp--------------------
+
+export const verifyLoginOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the OTP is valid and not expired
+    if (user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // OTP verified successfully, clear the OTP fields
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    // Save the user without OTP fields
+    await user.save();
+
+    // Generate JWT or session token for authenticated user
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+    res.status(200).json({ 
+      message: "Login successful", 
+      accessToken, 
+      refreshToken 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
 //   ---------------resetPassword-Phase--------------------
 
 export const resetPassword = async (req, res) => {
@@ -392,7 +541,7 @@ const generateRandomUsername = (length = 8) => {
 };
 
 export const requestOTP = async (req, res) => {
-  const { phone ,password} = req.body;
+  const { phone, password } = req.body;
 
   try {
     if (!phone && !password) {
@@ -414,7 +563,7 @@ export const requestOTP = async (req, res) => {
       // Create new user with phone number and generated username
       user = await User.create({
         phone: phoneStr,
-        password:password,
+        password: password,
         username: username, // Store the generated username
         // Other fields can be added as needed
       });
