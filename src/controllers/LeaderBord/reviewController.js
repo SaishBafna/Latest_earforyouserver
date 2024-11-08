@@ -1,66 +1,133 @@
 import Review from "../../models/LeaderBoard/Review.js";
 import User from "../../models/Users.js";
 import mongoose from "mongoose";
+import CallLog from "../../models/Talk-to-friend/callLogModel.js";
+
+// export const createReview = async (req, res) => {
+//   try {
+//     const { rating, comment,userId,reviewerId } = req.body;
+  
+//     console.log("rating:", rating, "Comment:", comment, "User ID:", userId, "Reviewer ID:", reviewerId);
+
+//     // Validate request body
+//     if (!userId) {
+//       return res.status(400).json({ message: "User ID is required." });
+//     }
+
+//     // Check if the recipient exists
+//     const recipient = await User.findById(userId);
+//     if (!recipient) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     // Check if a review with a rating already exists for the reviewer and recipient
+//     let existingReview = await Review.findOne({ user: userId, reviewer: reviewerId });
+
+//     if (existingReview) {
+//       if (rating) {
+//         return res.status(400).json({ message: "You have already rated this user. Only comments/replies are allowed." });
+//       }
+
+//       // Add a comment/reply if only a comment is being posted
+//       if (comment) {
+//         existingReview.comments.push({ text: comment, commenter: reviewerId });
+//         await existingReview.save();
+//         return res.status(200).json({ success: true, message: "Comment added.", review: existingReview });
+//       } else {
+//         return res.status(400).json({ message: "Comment is required when no rating is provided." });
+//       }
+//     }
+
+//     // Create a new review if no existing review with a rating was found
+    
+//     const review = new Review({
+//       user: userId, // The recipient
+//       reviewer: reviewerId, // The one giving the review
+//       rating: rating || null,
+//       comments: comment ? [{ text: comment, commenter: reviewerId }] : [] // Initialize comments array
+//     });
+
+//     await review.save();
+
+//     res.status(201).json({
+//       success: true, review, recipient: {
+//         name: recipient.name,
+        
+//       }
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: "Server error." });
+//   }
+// };
+//Nesting of Comments Controller 
+
+
 
 export const createReview = async (req, res) => {
   try {
-    const { rating, comment,userId,reviewerId } = req.body;
-  
-    console.log("rating:", rating, "Comment:", comment, "User ID:", userId, "Reviewer ID:", reviewerId);
+    const { rating, comment, userId, reviewerId } = req.body;
 
     // Validate request body
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required." });
+    if (!userId || !reviewerId) {
+      return res.status(400).json({ message: "User ID and Reviewer ID are required." });
     }
 
-    // Check if the recipient exists
+    // Check if the recipient (user being reviewed) exists
     const recipient = await User.findById(userId);
     if (!recipient) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Check if a review with a rating already exists for the reviewer and recipient
+    // Check if a review with a rating already exists for this reviewer and recipient
     let existingReview = await Review.findOne({ user: userId, reviewer: reviewerId });
 
     if (existingReview) {
-      if (rating) {
-        return res.status(400).json({ message: "You have already rated this user. Only comments/replies are allowed." });
+      // If a rating exists, prevent another rating but allow comments
+      if (existingReview.rating && rating) {
+        return res.status(400).json({
+          message: "You have already rated this user. Only comments are allowed."
+        });
       }
 
-      // Add a comment/reply if only a comment is being posted
+      // If no rating is provided, allow only comments to be added
       if (comment) {
         existingReview.comments.push({ text: comment, commenter: reviewerId });
         await existingReview.save();
-        return res.status(200).json({ success: true, message: "Comment added.", review: existingReview });
+        return res.status(200).json({
+          success: true,
+          message: "Comment added.",
+          review: existingReview,
+        });
       } else {
         return res.status(400).json({ message: "Comment is required when no rating is provided." });
       }
     }
 
-    // Create a new review if no existing review with a rating was found
-    const recipientAddress = recipient.companyAddress || 'Address not available'; // Assuming 'address' is a field in the User model
+    // Create a new review if no existing review with a rating is found
     const review = new Review({
       user: userId, // The recipient
       reviewer: reviewerId, // The one giving the review
       rating: rating || null,
-      Address: recipientAddress,
-      comments: comment ? [{ text: comment, commenter: reviewerId }] : [] // Initialize comments array
+      comments: comment ? [{ text: comment, commenter: reviewerId }] : [], // Initialize comments array
     });
 
     await review.save();
 
     res.status(201).json({
-      success: true, review, recipient: {
+      success: true,
+      review,
+      recipient: {
         name: recipient.name,
-        address: recipient.address // Include recipient's address in the response
-      }
+      },
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error." });
   }
 };
-//Nesting of Comments Controller 
+
+
 export const addCommentToReview = async (req, res) => {
   try {
     console.log("req.user:", req.user);
@@ -183,7 +250,7 @@ export const deleteReview = async (req, res) => {
   try {
     const userId = req.user._id; // Assuming user ID is set by the protect middleware
 
-    const review = await Review.findByIdAndDelete(reviewId);
+    const review = await Review.findByIdAndDelete(userId);
 
     if (!review) {
       return res.status(404).json({ message: "Review not found." });

@@ -12,6 +12,8 @@ export const setupWebRTC = (io) => {
   const activeCalls = {}; // { userId: otherUserId }
   const callTimings = {};
   const randomCallQueue = new Set();
+
+
   io.on('connection', (socket) => {
     logger.http(`User connected: ${socket.id}`);
   
@@ -364,6 +366,8 @@ export const setupWebRTC = (io) => {
     //     socket.emit('callError', { message: 'Failed to accept call' });
     //   }
     // });
+    
+    
     socket.on('acceptCall', async ({ receiverId, callerId }) => {
       try {
         logger.info(`User ${receiverId} accepted call from User ${callerId}`);
@@ -505,11 +509,9 @@ export const setupWebRTC = (io) => {
         logger.error(`Error in endCall handler: ${error.message}`);
       }
     });
-
-
-
-    // Handle disconnection
+ 
     // Update disconnect handler to handle call timings cleanup
+   
     socket.on('disconnect', () => {
       logger.info(`Socket disconnected: ${socket.id}`);
 
