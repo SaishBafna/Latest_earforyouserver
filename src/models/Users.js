@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
     referalCode:{
       type : String,
       unique:true,
+      required: false,
     },
 
     gender: {

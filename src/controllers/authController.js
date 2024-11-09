@@ -446,66 +446,121 @@ export const updateOrCreateUserCategory = async (req, res) => {
 };
 
 // ------------------------useruserController.js---------------------------------------
-
 export const updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { username, dateOfBirth, gender, Language,phone } = req.body;
+    const { username, dateOfBirth, gender, language, phone } = req.body;
 
-    // Validation
-    if (username && typeof username !== 'string') {
-      return res.status(400).json({ success: false, message: 'Username must be a string' });
-    }
-    if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
-      return res.status(400).json({ success: false, message: 'Invalid date of birth format' });
-    }
-    if (gender && !['male', 'female', 'other'].includes(gender.toLowerCase())) {
-      return res.status(400).json({ success: false, message: 'Invalid gender' });
-    }
+    // Input validation
+    const validationErrors = [];
 
-    // Check if all required fields are provided
-    if (!username || !dateOfBirth || !gender || !Language) {
-      // Create a new user if details are not available
-      const newUser = new User({
-        _id: userId,
-        username,
-        dateOfBirth,
-        Language,
-        gender,
-        phone
-        // Add other required fields as necessary
-      });
-
-      const savedUser = await newUser.save(); // Save the new user
-
-      return res.status(201).json({
-        success: true,
-        message: 'New user created successfully',
-        user: savedUser // Return the newly created user object
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
       });
     }
 
-    // Update user profile if all required fields are present
+    // Validate individual fields if they are provided
+    if (username !== undefined) {
+      if (typeof username !== 'string' || username.trim().length === 0) {
+        validationErrors.push('Username must be a non-empty string');
+      }
+    }
+
+    if (dateOfBirth !== undefined) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+        validationErrors.push('Date of birth must be in YYYY-MM-DD format');
+      } else {
+        const date = new Date(dateOfBirth);
+        if (isNaN(date.getTime())) {
+          validationErrors.push('Invalid date of birth');
+        }
+      }
+    }
+
+    if (gender !== undefined) {
+      if (!['male', 'female', 'other'].includes(gender.toLowerCase())) {
+        validationErrors.push('Gender must be either "male", "female", or "other"');
+      }
+    }
+
+    if (phone !== undefined) {
+      // Add your phone validation regex here
+      const phoneRegex = /^\+?[\d\s-]{10,}$/;  // Basic example - adjust as needed
+      if (!phoneRegex.test(phone)) {
+        validationErrors.push('Invalid phone number format');
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationErrors
+      });
+    }
+
+    // Check if user exists
+    const existingUser = await User.findById(userId);
+    
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Prepare update data with only provided fields
     const updateData = {
-      ...(username && { username }),
-      ...(dateOfBirth && { dateOfBirth }),
-      ...(gender && { gender }),
-      ...(Language && { Language }),
-      ...(phone && { phone }),
+      ...(username !== undefined && { username }),
+      ...(dateOfBirth !== undefined && { dateOfBirth }),
+      ...(gender !== undefined && { gender: gender.toLowerCase() }),
+      ...(language !== undefined && { language }),
+      ...(phone !== undefined && { phone }),
+      updatedAt: new Date()
     };
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    // Update user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { 
+        new: true,
+        runValidators: true
+      }
+    );
 
-    if (!updatedUser) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+    
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: Object.values(error.errors).map(err => err.message)
+      });
     }
 
-    res.status(200).json({ success: true, user: updatedUser });
-  } catch (error) {
-    console.error('Server error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating the profile',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
+
+ 
+
+
+
 //--------------------------Update User Avatra-----------------------------------------
 
 
