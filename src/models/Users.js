@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema(
     },
     userCategory: {
       type: String,
-      enum: ["Doctor", "Therapist", "Healer", "Psychologist"],
+      enum: ["Doctor", "Therapist", "Healer", "Psychologist","User"],
     },
     email:{
       type: String,
