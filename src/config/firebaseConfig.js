@@ -1,31 +1,38 @@
-import admin from 'firebase-admin';
-import dotenv from 'dotenv';
+import admin from "firebase-admin";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-// Parse the service account JSON safely
-let serviceAccount = null;
+let serviceAccount;
 
 try {
-  if (process.env.serviceAccount) {
-    serviceAccount = JSON.parse(process.env.serviceAccount);
-  } else if (process.env.serviceAccount1) {
-    serviceAccount = JSON.parse(process.env.serviceAccount1);
+  const raw =
+    process.env.serviceAccount || process.env.serviceAccount1;
+
+  if (!raw) {
+    throw new Error("Firebase service account env not found");
   }
+
+  serviceAccount = JSON.parse(raw);
+
+  // 🔴 FIX newline issue
+  serviceAccount.private_key = serviceAccount.private_key.replace(
+    /\\n/g,
+    "\n"
+  );
 } catch (error) {
-  console.error("Error parsing Firebase service account JSON:", error);
-  process.exit(1); // Exit if there's an issue with the credentials
+  console.error("❌ Firebase service account parse error:", error);
+  process.exit(1);
 }
 
-if (!serviceAccount) {
-  throw new Error("No valid Firebase service account found.");
+// 🔴 VERY IMPORTANT: initialize only once
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: serviceAccount.project_id, // 🔥 REQUIRED
+  });
+
+  console.log("✅ Firebase Admin Initialized");
 }
-
-// Initialize Firebase Admin SDK
-const data = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-console.log("Firebase Admin Initialized",data);
 
 export default admin;
