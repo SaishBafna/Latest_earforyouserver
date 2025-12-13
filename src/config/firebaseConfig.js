@@ -5,7 +5,7 @@ dotenv.config();
 
 // Parse the service account JSON safely
 const serviceAccount = JSON.parse(process.env.serviceAccount || process.env.serviceAccount1 || 'null');
-
+console.log("Firebase service account loaded.",serviceAccount);
 // try {
 //   if (process.env.serviceAccount) {
 //     console.log(process.env.serviceAccount);
