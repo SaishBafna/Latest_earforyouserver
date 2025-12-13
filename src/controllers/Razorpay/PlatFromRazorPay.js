@@ -3,7 +3,7 @@ import PlatformCharges from '../../models/Wallet/PlatfromCharges/Platfrom.js';
 import MyPlan from '../../models/Wallet/PlatfromCharges/myPlanSchema.js';
 import { CouponUsage, Coupon } from '../../models/CouponSystem/couponModel.js';
 import User from '../../models/Users.js';
-import admin from 'firebase-admin';
+import admin from '../../config/firebaseConfig.js';
 import crypto from 'crypto';
 
 // export const createOrder = async (req, res) => {

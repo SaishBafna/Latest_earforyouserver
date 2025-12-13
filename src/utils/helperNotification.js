@@ -1,6 +1,6 @@
 import ThreadNotificationModel from '../models/ThreadNotification.js';
 import User from '../models/Users.js';
-import admin from 'firebase-admin';
+import admin from '../config/firebaseConfig.js';
 import logger from '../config/logger.js';
 
 /**

@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import { ApiError } from '../../utils/ApiError.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
 import User from '../../models/Users.js';
-import admin from 'firebase-admin';
+import admin from '../../config/firebaseConfig.js';
 
 // Initialize Razorpay instance with error handling
 let instance;

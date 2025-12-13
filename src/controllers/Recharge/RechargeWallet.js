@@ -4,7 +4,7 @@ import Wallet from '../../models/Wallet/Wallet.js';
 import User from '../../models/Users.js'
 import sha256 from "sha256";
 import uniqid from "uniqid";
-import admin from 'firebase-admin';
+import admin from '../../config/firebaseConfig.js';
 import firebaseConfig from '../../config/firebaseConfig.js';
 import SubscriptionPlan from '../../models/Subscription/Subscription.js';
 import EarningWallet from '../../models/Wallet/EarningWallet.js';

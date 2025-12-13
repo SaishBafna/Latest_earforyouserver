@@ -10,7 +10,7 @@ import unirest from "unirest";
 import otpGenerator from 'otp-generator';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose'
-import admin from 'firebase-admin';
+import admin from '../config/firebaseConfig.js';
 import Wallet from "../models/Wallet/Wallet.js";
 import { CallRate } from '../models/Wallet/AdminCharges.js'
 import emailValidator from 'email-validator';

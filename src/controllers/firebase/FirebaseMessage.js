@@ -2,7 +2,7 @@
 // import { Console } from 'winston/lib/winston/transports/index.js';
 import firebaseConfig from '../../config/firebaseConfig.js';
 import User from '../../models/Users.js';
-import admin from 'firebase-admin';
+import admin from '../../config/firebaseConfig.js';
 import { getMessaging } from 'firebase-admin/messaging';
 import { ChatMessage } from '../../models/message.models.js';
 import { Chat } from '../../models/chat.modal.js';
