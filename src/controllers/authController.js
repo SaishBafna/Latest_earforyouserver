@@ -3837,7 +3837,7 @@ async function sendNotification1(userId, title, message) {
     }
 
     // 🔗 CHANGE THIS TO YOUR NEW APP / WEBSITE URL
-    const REDIRECT_URL = "https://play.google.com/store/apps/details?id=com.yournewapp.package";
+    const REDIRECT_URL = "https://play.google.com/store/apps/details?id=com.earforall.app";
 
     const payload = {
       token: deviceToken,
