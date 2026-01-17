@@ -65,132 +65,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-// export const getTopListenersByRating = async (req, res) => {
-//   try {
-//     const startTime = process.hrtime();
-
-//     const topListeners = await Review.aggregate([
-//       {
-//         $match: {
-//           rating: { $gte: 0, $lte: 5 },
-//           createdAt: { $exists: true }
-//         }
-//       },
-//       {
-//         $lookup: {
-//           from: "users",
-//           let: { userId: "$user" },
-//           pipeline: [
-//             {
-//               $match: {
-//                 $expr: { $eq: ["$_id", "$$userId"] },
-//                 userType: "RECEIVER",
-//                 UserStatus: "Active"
-//                 // Removed status and deletedAt for broader results
-//               }
-//             },
-//             {
-//               $project: {
-//                 username: 1,
-//                 userCategory: 1,
-//                 status: 1,
-//                 avatarUrl: 1,
-//                 shortDecs: 1,
-//                 Bio: 1,
-//                 CallStatus: 1,
-//                 createdAt: 1
-//               }
-//             }
-//           ],
-//           as: "userData"
-//         }
-//       },
-//       { $match: { userData: { $ne: [] } } },
-//       { $unwind: "$userData" },
-//       {
-//         $group: {
-//           _id: "$user",
-//           averageRating: { $avg: "$rating" },
-//           reviewCount: { $sum: 1 },
-//           username: { $first: "$userData.username" },
-//           userCategory: { $first: "$userData.userCategory" },
-//           status: { $first: "$userData.status" },
-//           avatarUrl: { $first: "$userData.avatarUrl" },
-//           shortBio: { $first: "$userData.shortDecs" },
-//           bio: { $first: "$userData.Bio" },
-//           callStatus: { $first: "$userData.CallStatus" },
-//           createdAt: { $first: "$userData.createdAt" }
-//         }
-//       },
-//       {
-//         $match: {
-//           reviewCount: { $gte: 1 }, // Lowered threshold
-//           averageRating: { $gte: 1 }
-//         }
-//       },
-//       {
-//         $sort: {
-//           averageRating: -1,
-//           reviewCount: -1,
-//           createdAt: -1
-//         }
-//       },
-//       { $limit: 10 },
-//       {
-//         $project: {
-//           userId: "$_id",
-//           username: 1,
-//           userCategory: 1,
-//           status: 1,
-//           callStatus: 1,
-//           avatarUrl: 1,
-//           shortBio: 1,
-//           bio: 1,
-//           reviewCount: 1,
-//           averageRating: { $round: [{ $ifNull: ["$averageRating", 0] }, 2] }
-//         }
-//       }
-//     ]).allowDiskUse(true);
-
-//     const executionTime = ((process.hrtime(startTime)[0] * 1000 +
-//       process.hrtime(startTime)[1] / 1e6).toFixed(2));
-
-//     const rankedListeners = topListeners.map((listener, index) => {
-//       if (!listener.userId || !listener.username) {
-//         console.warn('Invalid listener data:', listener);
-//         return null;
-//       }
-//       return {
-//         rank: index + 1,
-//         ...listener
-//       };
-//     }).filter(listener => listener !== null);
-
-//     if (!rankedListeners.length) {
-//       return res.status(200).json({
-//         success: true,
-//         message: 'No qualifying listeners found',
-//         executionTime: `${executionTime}ms`,
-//         data: []
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       executionTime: `${executionTime}ms`,
-//       data: rankedListeners
-//     });
-
-//   } catch (error) {
-//     console.error('Error fetching top listeners:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to fetch top listeners',
-//       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-//     });
-//   }
-// };
-
 export const getTopListenersByDuration = async (req, res) => {
   try {
     const startTime = process.hrtime();
@@ -306,7 +180,7 @@ export const getTopListenersByDuration = async (req, res) => {
 
     const finalResults = rankedListeners.slice(
       0,
-      Math.max(minResultsNeeded, rankedListeners.length)
+      Math.max(minResultsNeeded, rankedListeners.length),
     );
 
     res.status(200).json({
@@ -437,7 +311,7 @@ export const logoutUser = async (req, res) => {
           deviceToken: "",
         },
       },
-      { new: true }
+      { new: true },
     );
 
     const options = {
@@ -452,6 +326,34 @@ export const logoutUser = async (req, res) => {
       .json({ message: "User logged out successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const userDelete_id = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Check if the user exists
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting user",
+      error: error.message,
+    });
   }
 };
 
@@ -587,7 +489,7 @@ export const initiateRegistration = async (req, res) => {
               lastUpdated: new Date(),
             },
           ],
-          { session }
+          { session },
         );
 
         // Create wallet with transaction
@@ -602,21 +504,21 @@ export const initiateRegistration = async (req, res) => {
               lastUpdated: new Date(),
             },
           ],
-          { session }
+          { session },
         );
 
         // Generate access token
         const authToken = jwt.sign(
           { userId: newUser._id },
           process.env.JWT_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "1h" },
         );
 
         // Generate refresh token
         const refreshToken = jwt.sign(
           { userId: newUser._id },
           process.env.REFRESH_TOKEN_SECRET,
-          { expiresIn: "30d" }
+          { expiresIn: "30d" },
         );
 
         // Save refresh token to user document
@@ -688,7 +590,7 @@ export const initiateRegistration = async (req, res) => {
               planId: plan._id,
             },
           ],
-          { session }
+          { session },
         );
       }
 
@@ -714,7 +616,7 @@ export const initiateRegistration = async (req, res) => {
             lastUpdated: new Date(),
           },
         ],
-        { session }
+        { session },
       );
 
       await EarningWallet.create(
@@ -728,13 +630,13 @@ export const initiateRegistration = async (req, res) => {
             lastUpdated: new Date(),
           },
         ],
-        { session }
+        { session },
       );
 
       console.log(
         "Wallet created with initial balance for user:",
         newUser._id,
-        wallet
+        wallet,
       );
 
       await session.commitTransaction();
@@ -743,7 +645,7 @@ export const initiateRegistration = async (req, res) => {
         if (!mailingListResult.success) {
           console.error(
             "Failed to add to mailing list:",
-            mailingListResult.message
+            mailingListResult.message,
           );
           // Optional: Handle the failure (e.g., retry later, notify admin)
         }
@@ -802,7 +704,7 @@ export const initiateLogin = async (req, res) => {
 
     // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id
+      user._id,
     );
 
     res.status(200).json({
@@ -845,7 +747,7 @@ export const verifyLoginOtp = async (req, res) => {
 
     // Generate JWT or session token for authenticated user
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id
+      user._id,
     );
 
     // Update device token if provided
@@ -920,13 +822,11 @@ export const deleteUser = async (req, res) => {
       .json({ success: true, message: "User deleted successfully" });
   } catch (error) {
     console.error("Error deleting user:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error deleting user",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting user",
+      error: error.message,
+    });
   }
 };
 
@@ -1046,7 +946,7 @@ export const updateProfile = async (req, res) => {
     if (gender !== undefined) {
       if (!["male", "female", "other"].includes(gender.toLowerCase())) {
         validationErrors.push(
-          'Gender must be either "male", "female", or "other"'
+          'Gender must be either "male", "female", or "other"',
         );
       }
     }
@@ -1145,7 +1045,7 @@ export const updateProfile = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     return res.status(200).json({
@@ -1194,15 +1094,11 @@ export const updateProfileDesc = async (req, res) => {
 
     // 🔥 OPTIONAL: delete old voice from Cloudinary
     if (user.record_desc) {
-      const publicId = user.record_desc
-        .split("/")
-        .slice(-1)[0]
-        .split(".")[0];
+      const publicId = user.record_desc.split("/").slice(-1)[0].split(".")[0];
 
-      await cloudinary.uploader.destroy(
-        `user_voice_records/${publicId}`,
-        { resource_type: "video" }
-      );
+      await cloudinary.uploader.destroy(`user_voice_records/${publicId}`, {
+        resource_type: "video",
+      });
     }
 
     // Save new voice URL
@@ -1250,15 +1146,12 @@ export const deleteProfileDesc = async (req, res) => {
      * Example:
      * https://res.cloudinary.com/xxx/video/upload/v123/user_voice_records/voice_123.mp3
      */
-    const publicId = user.record_desc
-      .split("/")
-      .slice(-1)[0]
-      .split(".")[0];
+    const publicId = user.record_desc.split("/").slice(-1)[0].split(".")[0];
 
     // Delete from Cloudinary
     await cloudinary.uploader.destroy(
       `user_voice_records/${publicId}`,
-      { resource_type: "video" } // REQUIRED for audio
+      { resource_type: "video" }, // REQUIRED for audio
     );
 
     // Remove from DB
@@ -1329,7 +1222,7 @@ export const updateStatus = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     return res.status(200).json({
@@ -1548,7 +1441,7 @@ export const updateDeviceToken = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { deviceToken },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {
@@ -1610,7 +1503,7 @@ export const requestOTP = async (req, res) => {
     // Use Firebase's phoneAuth flow to send an OTP
     const sessionInfo = await admin.auth().createCustomToken(phoneStr);
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id
+      user._id,
     );
     return res.status(200).json({
       message: "OTP sent successfully",
@@ -1662,7 +1555,7 @@ export const verifyOTP = async (req, res) => {
 
     // Generate tokens (assuming generateAccessAndRefreshTokens is defined elsewhere)
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id
+      user._id,
     );
 
     return res.status(200).json({
@@ -1712,7 +1605,7 @@ export const changeUserType = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { userType: userType },
-      { new: true, runValidators: true } // Enable validators and return updated document
+      { new: true, runValidators: true }, // Enable validators and return updated document
     );
 
     if (!updatedUser) {
@@ -3225,7 +3118,7 @@ export const Reporte_User = async (req, res) => {
       console.log(
         `User ${
           reportedUser.username || reportedUserId
-        } has been blocked due to excessive reports.`
+        } has been blocked due to excessive reports.`,
       );
     }
 
@@ -3278,7 +3171,7 @@ export const addOrUpdateBankDetails = async (req, res) => {
 
     // Check if account number exists
     const existingIndex = user.bankDetails.findIndex(
-      (detail) => detail.accountNumber === accountNumber
+      (detail) => detail.accountNumber === accountNumber,
     );
 
     if (existingIndex !== -1) {
@@ -3348,7 +3241,7 @@ export const getBankDetail = async (req, res) => {
     }
 
     const detail = user.bankDetails.find(
-      (d) => d.accountNumber === accountNumber
+      (d) => d.accountNumber === accountNumber,
     );
 
     if (!detail) {
@@ -3375,7 +3268,7 @@ export const deleteBankDetail = async (req, res) => {
 
     const initialLength = user.bankDetails.length;
     user.bankDetails = user.bankDetails.filter(
-      (d) => d.accountNumber !== accountNumber
+      (d) => d.accountNumber !== accountNumber,
     );
 
     if (user.bankDetails.length === initialLength) {
@@ -3411,7 +3304,7 @@ export const setDefaultBankAccount = async (req, res) => {
 
     // Find and set the specified one as default
     const detail = user.bankDetails.find(
-      (d) => d.accountNumber === accountNumber
+      (d) => d.accountNumber === accountNumber,
     );
 
     if (!detail) {
@@ -3464,12 +3357,10 @@ export const subscribeUser = async (req, res) => {
       response,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to add user to mailing list.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to add user to mailing list.",
+      error: error.message,
+    });
   }
 };
 
@@ -3862,7 +3753,7 @@ export const getChatsWithLatestMessages = async (req, res) => {
       req,
       userId.toString(),
       ChatEventEnum.NEW_CHAT_EVENT,
-      formattedChats
+      formattedChats,
     );
 
     res.json({
@@ -3928,7 +3819,7 @@ export const UpdateCallStatus = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userid,
       { CallStatus: CallStats },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     // If no user is found with the given userid
@@ -3968,7 +3859,7 @@ export const ChatStatusStatus = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userid,
       { ChatStatus: ChatStatus },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     // If no user is found with the given userid
