@@ -1,13 +1,13 @@
-import { getAllAgents } from "../controllers/agent.controller.js";
-import User from "../models/Users.js";
+import { getAllAgents } from "../src/controllers/chat-app/getAllAgentController.js";
+import User from "../src/models/Users.js";
 
 // ---- Mock asyncHandler to pass-through ----
-jest.mock("../utils/asyncHandler.js", () => ({
+jest.mock("../src/utils/asyncHandler.js", () => ({
   asyncHandler: (fn) => fn,
 }));
 
 // ---- Mock User Model ----
-jest.mock("../models/Users.js");
+jest.mock("../src/models/Users.js");
 
 // ---- Helper for res ----
 const mockRes = () => {

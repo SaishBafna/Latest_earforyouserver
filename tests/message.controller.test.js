@@ -3,33 +3,33 @@ import {
   getAllMessages,
   sendMessage,
   deleteMessage
-} from "../controllers/message.controller.js";
+} from "../src/controllers/chat-app/message.controllers.js";
 
-import { Chat } from "../models/chat.modal.js";
-import { ChatMessage } from "../models/message.models.js";
-import User from "../models/Users.js";
-import { emitSocketEvent } from "../socket/index.js";
-import admin from "../config/firebaseConfig.js";
-import { ApiError } from "../utils/ApiError.js";
+import { Chat } from "../src/models/chat.modal.js";
+import { ChatMessage } from "../src/models/message.models.js";
+import User from "../src/models/Users.js";
+import { emitSocketEvent } from "../src/socket/index.js";
+import admin from "../src/config/firebaseConfig.js";
+import { ApiError } from "../src/utils/ApiError.js";
 
 // ================= MOCKS =================
-jest.mock("../models/chat.modal.js");
-jest.mock("../models/message.models.js");
-jest.mock("../models/Users.js");
-jest.mock("../socket/index.js");
-jest.mock("../config/firebaseConfig.js", () => ({
+jest.mock("../src/models/chat.modal.js");
+jest.mock("../src/models/message.models.js");
+jest.mock("../src/models/Users.js");
+jest.mock("../src/socket/index.js");
+jest.mock("../src/config/firebaseConfig.js", () => ({
   messaging: () => ({
     send: jest.fn(),
   }),
 }));
 
-jest.mock("../utils/helpers.js", () => ({
+jest.mock("../src/utils/helpers.js", () => ({
   getLocalPath: jest.fn(() => "/local/file"),
   getStaticFilePath: jest.fn(() => "/static/file"),
   removeLocalFile: jest.fn(),
 }));
 
-jest.mock("../utils/asyncHandler.js", () => ({
+jest.mock("../src/utils/asyncHandler.js", () => ({
   asyncHandler: (fn) => fn,
 }));
 // =========================================

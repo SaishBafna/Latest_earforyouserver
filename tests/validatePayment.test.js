@@ -2,35 +2,35 @@
  * TEST FILE: validatePayment.test.js
  */
 
-import { validatePayment } from "../../../path/to/controller.js";
-import PlatformCharges from "../../../models/Wallet/PlatfromCharges/Platfrom.js";
-import MyPlan from "../../../models/Wallet/PlatfromCharges/myPlanSchema.js";
-import User from "../../../models/Users.js";
-import { Coupon, CouponUsage } from "../../../models/CouponSystem/couponModel.js";
+import { validatePayment } from "../src/controllers/Recharge/RechargeWallet.js";
+import PlatformCharges from "../src/models/Wallet/PlatfromCharges/Platfrom.js";
+import MyPlan from "../src/models/Wallet/PlatfromCharges/myPlanSchema.js";
+import User from "../src/models/Users.js";
+import { Coupon, CouponUsage } from "../src/models/CouponSystem/couponModel.js";
 
 import axios from "axios";
-import admin from "../../../config/firebaseConfig.js";
+import admin from "../src/config/firebaseConfig.js";
 import { createHash } from "crypto";
 
 jest.mock("axios");
 jest.mock("crypto", () => ({
   createHash: jest.fn()
 }));
-jest.mock("../../../models/Wallet/PlatfromCharges/Platfrom.js", () => ({
+jest.mock("../src/models/Wallet/PlatfromCharges/Platfrom.js", () => ({
   findOne: jest.fn(),
   create: jest.fn()
 }));
-jest.mock("../../../models/Wallet/PlatfromCharges/myPlanSchema.js", () => ({
+jest.mock("../src/models/Wallet/PlatfromCharges/myPlanSchema.js", () => ({
   findById: jest.fn()
 }));
-jest.mock("../../../models/Users.js", () => ({
+jest.mock("../src/models/Users.js", () => ({
   findById: jest.fn()
 }));
-jest.mock("../../../models/CouponSystem/couponModel.js", () => ({
+jest.mock("../src/models/CouponSystem/couponModel.js", () => ({
   Coupon: { findOne: jest.fn() },
   CouponUsage: { findOne: jest.fn(), create: jest.fn() }
 }));
-jest.mock("../../../config/firebaseConfig.js", () => ({
+jest.mock("../src/config/firebaseConfig.js", () => ({
   messaging: () => ({
     send: jest.fn()
   })

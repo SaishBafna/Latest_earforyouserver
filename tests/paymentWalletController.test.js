@@ -8,32 +8,31 @@ import {
   getEarningHistory,
   getAllPlans,
   transferEarningsToWallet
-} from "../../../path/to/controller.js";
+} from "../src/controllers/Recharge/RechargeWallet.js";
 
 import axios from "axios";
 import sha256 from "sha256";
 import mongoose from "mongoose";
-import Wallet from "../../../models/Wallet/Wallet.js";
-import EarningWallet from "../../../models/Wallet/EarningWallet.js";
-import SubscriptionPlan from "../../../models/Subscription/Subscription.js";
-import User from "../../../models/Users.js";
-import { Coupon, CouponUsage } from "../../../models/CouponSystem/couponModel.js";
-import admin from "../../../config/firebaseConfig.js";
+import Wallet from "../src/models/Wallet/Wallet.js";
+import EarningWallet from "../src/models/Wallet/EarningWallet.js";
+import SubscriptionPlan from "../src/models/Subscription/Subscription.js";
+import User from "../src/models/Users.js";
+import { Coupon, CouponUsage } from "../src/models/CouponSystem/couponModel.js";
 
 // ================================
 // MOCKS
 // ================================
 jest.mock("axios");
 jest.mock("sha256");
-jest.mock("../../../models/Wallet/Wallet.js");
-jest.mock("../../../models/Wallet/EarningWallet.js");
-jest.mock("../../../models/Subscription/Subscription.js");
-jest.mock("../../../models/Users.js");
-jest.mock("../../../models/CouponSystem/couponModel.js", () => ({
+jest.mock("../src/models/Wallet/Wallet.js");
+jest.mock("../src/models/Wallet/EarningWallet.js");
+jest.mock("../src/models/Subscription/Subscription.js");
+jest.mock("../src/models/Users.js");
+jest.mock("../src/models/CouponSystem/couponModel.js", () => ({
   Coupon: { findOne: jest.fn() },
   CouponUsage: { findOne: jest.fn(), create: jest.fn() }
 }));
-jest.mock("../../../config/firebaseConfig.js", () => ({
+jest.mock("../src/config/firebaseConfig.js", () => ({
   messaging: () => ({
     send: jest.fn()
   })

@@ -5,12 +5,12 @@ import {
   getUserCoupons,
   getAllCoupons,
   toggleCouponStatus
-} from "../controllers/coupon.controller.js";
+} from "../src/controllers/CouponController/couponController.js";
 
-import { Coupon, CouponUsage } from "../models/CouponSystem/couponModel.js";
+import { Coupon, CouponUsage } from "../src/models/CouponSystem/couponModel.js";
 
 // ---------- Mocks ----------
-jest.mock("../models/CouponSystem/couponModel.js");
+jest.mock("../src/models/CouponSystem/couponModel.js");
 
 // ---------- Helpers ----------
 const mockRes = () => {

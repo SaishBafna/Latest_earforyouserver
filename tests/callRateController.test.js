@@ -7,12 +7,12 @@ import {
   updateCallRate,
   getAllCallRates,
   getCallRateByCategory
-} from "../../../path/to/your/controller.js";
+} from "../src/controllers/Recharge/RatePerMinController.js";
 
-import CallRatePerMin from "../../../models/Wallet/RatePerMin.js";
+import CallRatePerMin from "../src/models/Wallet/RatePerMin.js";
 
 // Mock Model
-jest.mock("../../../models/Wallet/RatePerMin.js", () => ({
+jest.mock("../src/models/Wallet/RatePerMin.js", () => ({
   findOne: jest.fn(),
   findOneAndUpdate: jest.fn(),
   find: jest.fn()

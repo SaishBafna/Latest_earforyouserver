@@ -1,8 +1,8 @@
 // subscriptionCron.test.js
 import cron from "node-cron";
 import mongoose from "mongoose";
-import { ChatUserPremium } from "../../../models/Subscriptionchat/ChatUserPremium.js";
-import logger from "../../../logger/winston.logger.js";
+import { ChatUserPremium } from "../src/models/Subscriptionchat/ChatUserPremium.js";
+import logger from "../src/logger/winston.logger.js";
 
 // ===== MOCKS =====
 jest.mock("node-cron", () => ({
@@ -13,19 +13,19 @@ jest.mock("mongoose", () => ({
   startSession: jest.fn()
 }));
 
-jest.mock("../../../models/Subscriptionchat/ChatUserPremium.js", () => ({
+jest.mock("../src/models/Subscriptionchat/ChatUserPremium.js", () => ({
   ChatUserPremium: {
     updateMany: jest.fn()
   }
 }));
 
-jest.mock("../../../logger/winston.logger.js", () => ({
+jest.mock("../src/logger/winston.logger.js", () => ({
   info: jest.fn(),
   error: jest.fn()
 }));
 
 // Import cron file AFTER mocks
-import "../../path/to/your/cronFile.js"; // <-- adjust path
+import "../src/controllers/CronJob/Expiry.js"; // <-- adjust path
 
 describe("Subscription Cron Job", () => {
   let mockSession;

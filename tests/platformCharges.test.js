@@ -2,8 +2,8 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import PlatformCharges from "../../models/Wallet/PlatfromCharges/Platfrom.js"; // adjust path
-import { expirePlatformCharges } from "../../controllers/admin/platformChargesController.js"; // adjust path
+import PlatformCharges from "../src/models/Wallet/PlatfromCharges/Platfrom.js"; // adjust path
+import { expirePlatformCharges } from "../src/controllers/CronJob/Expiry.js"; // adjust path
 
 let app;
 let mongoServer;

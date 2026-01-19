@@ -5,16 +5,16 @@ import {
   rejectCall,
   endCall,
   handleMissedCall
-} from "../controllers/call.controller.js";
+} from "../src/controllers/CallController/CallController.js";
 
-import CallLog from "../models/Talk-to-friend/callLogModel.js";
-import createService from "../servises/CallServices.js";
-import logger from "../logger/winston.logger.js";
+import CallLog from "../src/models/Talk-to-friend/callLogModel.js";
+import createService from "../src/servises/CallServices.js";
+import logger from "../src/logger/winston.logger.js";
 
 // ---- Mocks ----
-jest.mock("../models/Talk-to-friend/callLogModel.js");
-jest.mock("../servises/CallServices.js");
-jest.mock("../logger/winston.logger.js");
+jest.mock("../src/models/Talk-to-friend/callLogModel.js");
+jest.mock("../src/servises/CallServices.js");
+jest.mock("../src/logger/winston.logger.js");
 
 // ---- Helpers ----
 const mockRes = () => {
