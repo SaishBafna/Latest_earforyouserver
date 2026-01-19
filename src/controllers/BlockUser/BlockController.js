@@ -93,3 +93,36 @@ export const getBlockedUsers = async (req, res) => {
     res.status(500).json({ message: 'Error fetching blocked users', error: error.message });
   }
 };
+
+export const getBlockById = async (req, res) => {
+  try {
+    const { blockId } = req.params;
+
+    const block = await Block.findById(blockId)
+      .populate("blocker", "username email") 
+      .populate("blocked", "username email");
+
+    if (!block) {
+      return res.status(404).json({ message: "Block record not found" });
+    }
+
+    res.status(200).json(block);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching block data", error: error.message });
+  }
+};
+
+export const getBlockStatusById = async (req, res) => {
+  try {
+    const { blockerId, blockedId } = req.params;
+
+    const block = await Block.findOne({ blocker: blockerId, blocked: blockedId });
+
+    res.status(200).json({
+      isBlocked: !!block,
+      block
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error checking block status", error: error.message });
+  }
+};
