@@ -6,25 +6,25 @@ import {
   searchAvailableUsers,
   getAllChats,
   getUnreadMessagesCount
-} from "../controllers/chat.controller.js";
+} from "../src/controllers/chat-app/chat.controllers.js";
 
-import User from "../models/Users.js";
-import { Chat } from "../models/chat.modal.js";
-import { ChatMessage } from "../models/message.models.js";
-import { emitSocketEvent } from "../socket/index.js";
-import { ApiError } from "../utils/ApiError.js";
+import User from "../src/models/Users.js";
+import { Chat } from "../src/models/chat.modal.js";
+import { ChatMessage } from "../src/models/message.models.js";
+import { emitSocketEvent } from "../src/socket/index.js";
+import { ApiError } from "../src/utils/ApiError.js";
 
 // ================= MOCKS =================
-jest.mock("../models/Users.js");
-jest.mock("../models/chat.modal.js");
-jest.mock("../models/message.models.js");
-jest.mock("../socket/index.js");
-jest.mock("../utils/helpers.js", () => ({
+jest.mock("../src/models/Users.js");
+jest.mock("../src/models/chat.modal.js");
+jest.mock("../src/models/message.models.js");
+jest.mock("../src/socket/index.js");
+jest.mock("../src/utils/helpers.js", () => ({
   removeLocalFile: jest.fn(),
 }));
 
 // asyncHandler mock – passes through
-jest.mock("../utils/asyncHandler.js", () => ({
+jest.mock("../src/utils/asyncHandler.js", () => ({
   asyncHandler: (fn) => fn,
 }));
 

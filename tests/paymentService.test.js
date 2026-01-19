@@ -2,21 +2,21 @@
  * @jest-environment node
  */
 
-import { paymentService } from "../../services/paymentService.js";
+import { paymentService } from "../src/services/paymentService.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
 jest.mock("razorpay");
 jest.mock("crypto");
-jest.mock("../../models/Subscriptionchat/ChatPremium.js", () => ({
+jest.mock("../src/models/Subscriptionchat/ChatPremium.js", () => ({
   findById: jest.fn()
 }));
-jest.mock("../../models/Subscriptionchat/ChatUserPremium.js", () => ({
+jest.mock("../src/models/Subscriptionchat/ChatUserPremium.js", () => ({
   create: jest.fn(),
   findOne: jest.fn(),
   findOneAndUpdate: jest.fn()
 }));
-jest.mock("../../models/CouponSystem/couponModel.js", () => ({
+jest.mock("../src/models/CouponSystem/couponModel.js", () => ({
   Coupon: {
     findOne: jest.fn()
   },
@@ -25,10 +25,10 @@ jest.mock("../../models/CouponSystem/couponModel.js", () => ({
     create: jest.fn()
   }
 }));
-jest.mock("../../models/Users.js", () => ({
+jest.mock("../src/models/Users.js", () => ({
   findById: jest.fn()
 }));
-jest.mock("../../config/firebaseConfig.js", () => ({
+jest.mock("../src/config/firebaseConfig.js", () => ({
   messaging: () => ({
     send: jest.fn()
   })

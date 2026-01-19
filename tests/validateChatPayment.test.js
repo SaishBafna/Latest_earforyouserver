@@ -1,46 +1,46 @@
-import { validateChatPayment } from "../path/to/controller.js";
-import { ChatUserPremium } from "../../../models/Subscriptionchat/ChatUserPremium.js";
-import ChatPremium from "../../../models/Subscriptionchat/ChatPremium.js";
-import { Coupon, CouponUsage } from "../../../models/CouponSystem/couponModel.js";
-import User from "../../../models/Users.js";
+import { validateChatPayment } from "../src/controllers/Recharge/ChatRecharge/ChatPayment.js";
+import { ChatUserPremium } from "../src/models/Subscriptionchat/ChatUserPremium.js";
+import ChatPremium from "../src/models/Subscriptionchat/ChatPremium.js";
+import { Coupon, CouponUsage } from "../src/models/CouponSystem/couponModel.js";
+import User from "../src/models/Users.js";
 import axios from "axios";
-import admin from "../../../config/firebaseConfig.js";
+import admin from "../src/config/firebaseConfig.js";
 import sha256 from "sha256";
 
 jest.mock("axios");
 jest.mock("sha256");
-jest.mock("../../../models/Subscriptionchat/ChatUserPremium.js", () => ({
+jest.mock("../src/models/Subscriptionchat/ChatUserPremium.js", () => ({
   ChatUserPremium: {
     findOne: jest.fn(),
     create: jest.fn()
   }
 }));
-jest.mock("../../../models/Subscriptionchat/ChatPremium.js", () => ({
+jest.mock("../src/models/Subscriptionchat/ChatPremium.js", () => ({
   __esModule: true,
   default: { findById: jest.fn() }
 }));
-jest.mock("../../../models/CouponSystem/couponModel.js", () => ({
+jest.mock("../src/models/CouponSystem/couponModel.js", () => ({
   Coupon: { findOne: jest.fn() },
   CouponUsage: { findOne: jest.fn(), create: jest.fn() }
 }));
-jest.mock("../../../models/Users.js", () => ({
+jest.mock("../src/models/Users.js", () => ({
   __esModule: true,
   default: { findById: jest.fn() }
 }));
-jest.mock("../../../config/firebaseConfig.js", () => ({
+jest.mock("../src/config/firebaseConfig.js", () => ({
   messaging: () => ({
     send: jest.fn()
   })
 }));
 
 // Mock ApiResponse & ApiError behavior
-jest.mock("../../../utils/ApiResponse.js", () => ({
+jest.mock("../src/utils/ApiResponse.js", () => ({
   ApiResponse: function(status, data, message) {
     return { status, data, message };
   }
 }));
 
-jest.mock("../../../utils/ApiError.js", () => ({
+jest.mock("../src/utils/ApiError.js", () => ({
   ApiError: class ApiError extends Error {
     constructor(status, message) {
       super(message);

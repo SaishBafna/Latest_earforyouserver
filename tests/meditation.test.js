@@ -2,8 +2,8 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import Meditation from "../../models/Meditation.js";
-import { createMeditation, getMeditations } from "../../controllers/meditationController.js"; // adjust path
+import Meditation from "../src/models/Meditation.js";
+import { createMeditation, getMeditations } from "../src/controllers/Meditation/MedController.js"; // adjust path
 
 let app;
 let mongoServer;

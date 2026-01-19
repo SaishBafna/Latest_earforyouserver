@@ -6,8 +6,7 @@ dotenv.config();
 let serviceAccount;
 
 try {
-  const raw =
-    process.env.serviceAccount || process.env.serviceAccount1;
+  const raw = process.env.serviceAccount || process.env.serviceAccount1;
 
   if (!raw) {
     throw new Error("Firebase service account env not found");
@@ -16,10 +15,7 @@ try {
   serviceAccount = JSON.parse(raw);
 
   // 🔴 FIX newline issue
-  serviceAccount.private_key = serviceAccount.private_key.replace(
-    /\\n/g,
-    "\n"
-  );
+  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 } catch (error) {
   console.error("❌ Firebase service account parse error:", error);
   process.exit(1);

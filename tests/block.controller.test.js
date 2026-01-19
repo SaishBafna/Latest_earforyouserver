@@ -3,14 +3,14 @@ import {
   unblockUser,
   checkBlockStatus,
   getBlockedUsers
-} from "../controllers/block.controller.js";
+} from "../src/controllers/BlockUser/BlockController.js";
 
-import Block from "../models/Block.js";
-import User from "../models/Users.js";
+import Block from "../src/models/Block.js";
+import User from "../src/models/Users.js";
 
 // Mock Mongoose models
-jest.mock("../models/Block.js");
-jest.mock("../models/Users.js");
+jest.mock("../src/models/Block.js");
+jest.mock("../src/models/Users.js");
 
 // Helper to mock res object
 const mockRes = () => {

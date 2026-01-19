@@ -1,12 +1,12 @@
 import {
   expirePlatformCharges,
   scheduleNextRun
-} from "../controllers/expiry/platformCharges.expiry.js";
+} from "../src/controllers/CronJob/Expiry.js";
 
-import PlatformCharges from "../models/Wallet/PlatfromCharges/Platfrom.js";
+import PlatformCharges from "../src/models/Wallet/PlatfromCharges/Platfrom.js";
 
 // --------- Mocks ----------
-jest.mock("../models/Wallet/PlatfromCharges/Platfrom.js");
+jest.mock("../src/models/Wallet/PlatfromCharges/Platfrom.js");
 
 // Use fake timers for scheduling
 jest.useFakeTimers();

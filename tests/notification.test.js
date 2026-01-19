@@ -2,9 +2,9 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import express from "express";
-import Notification from "../../models/Notification.Modal.js";
-import User from "../../models/User.model.js"; // adjust path if different
-import { getNotifications } from "../../controllers/admin/notificationController.js"; // adjust path
+import Notification from "../src/models/Notification.Modal.js";
+import User from "../src/models/User.model.js"; // adjust path if different
+import { getNotifications } from "../src/controllers/firebase/GetNotificaton.js"; // adjust path
 
 let app;
 let mongoServer;

@@ -1,9 +1,8 @@
-import { addRating } from "../controllers/appRating.controller.js";
-import AppRating from "../models/LeaderBoard/Apprate.js";
+import { addRating } from "../src/controllers/LeaderBord/Apprate.js";
+import AppRating from "../src/models/LeaderBoard/Apprate.js";
 
 // --------- Mocks ----------
-jest.mock("../models/LeaderBoard/Apprate.js");
-
+jest.mock("../src/models/LeaderBoard/Apprate.js");
 // --------- Helpers ----------
 const mockRes = () => {
   const res = {};

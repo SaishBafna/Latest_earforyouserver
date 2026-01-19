@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '.././index.js';
+import app from '../src/app.js';
 
 describe('Auth Endpoints', () => {
   it('should register a new user', async () => {

@@ -2,13 +2,13 @@
  * walletController.test.js
  */
 
-import { deductPlanMinutes, deductPerMinute, getCallRate } from "../../../path/to/controller.js";
+import { deductPlanMinutes, deductPerMinute, getCallRate } from "../src/controllers/Recharge/Decudition.js";
 
-import Wallet from "../../../models/Wallet/Wallet.js";
-import EarningWallet from "../../../models/Wallet/EarningWallet.js";
-import User from "../../../models/Users.js";
-import { CallRate } from "../../../models/Wallet/AdminCharges.js";
-import CallRatePerMin from "../../../models/Wallet/RatePerMin.js";
+import Wallet from "../src/models/Wallet/Wallet.js";
+import EarningWallet from "../src/models/Wallet/EarningWallet.js";
+import User from "../src/models/Users.js";
+import { CallRate } from "../src/models/Wallet/AdminCharges.js";
+import CallRatePerMin from "../src/models/Wallet/RatePerMin.js";
 
 import mongoose from "mongoose";
 
@@ -30,25 +30,25 @@ jest.mock("mongoose", () => ({
 }));
 
 // Mock Models
-jest.mock("../../../models/Wallet/Wallet.js", () => ({
+jest.mock("../src/models/Wallet/Wallet.js", () => ({
   findOne: jest.fn(),
   save: jest.fn()
 }));
 
-jest.mock("../../../models/Wallet/EarningWallet.js", () => ({
+jest.mock("../src/models/Wallet/EarningWallet.js", () => ({
   findOne: jest.fn(),
   save: jest.fn()
 }));
 
-jest.mock("../../../models/Users.js", () => ({
+jest.mock("../src/models/Users.js", () => ({
   findById: jest.fn()
 }));
 
-jest.mock("../../../models/Wallet/AdminCharges.js", () => ({
+jest.mock("../src/models/Wallet/AdminCharges.js", () => ({
   CallRate: { findOne: jest.fn() }
 }));
 
-jest.mock("../../../models/Wallet/RatePerMin.js", () => ({
+jest.mock("../src/models/Wallet/RatePerMin.js", () => ({
   findOne: jest.fn(),
   find: jest.fn()
 }));

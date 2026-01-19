@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { sendOtp, retryOtp, verifyOtp, updateOtpTemplate, getAnalyticsReport } from "../../controllers/msg91Controller.js";
+import { sendOtp, retryOtp, verifyOtp, updateOtpTemplate, getAnalyticsReport } from "../src/controllers/OTP/msg91Controller.js";
 import https from "https";
 
 jest.mock("https");

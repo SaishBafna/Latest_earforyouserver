@@ -4,15 +4,15 @@ import {
   getUsersByServiceType,
   getUserById,
   filterByReview
-} from "../controllers/user.controller.js";
+} from "../src/controllers/LeaderBord/userController.js";
 
-import User from "../models/Users.js";
-import Review from "../models/LeaderBoard/Review.js";
+import User from "../src/models/Users.js";
+import Review from "../src/models/LeaderBoard/Review.js";
 
 // ---------------- MOCKS ----------------
 jest.mock("axios");
-jest.mock("../models/Users.js");
-jest.mock("../models/LeaderBoard/Review.js");
+jest.mock("../src/models/Users.js");
+jest.mock("../src/models/LeaderBoard/Review.js");
 
 // ---------------- HELPERS ----------------
 const mockRes = () => {
