@@ -150,6 +150,90 @@ export const getWithdrawal = async (req, res) => {
     }
 };
 
+export const acceptWithdrawal = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+
+    const withdrawal = await WithdrawalRequest.findById(requestId);
+
+    if (!withdrawal) {
+      return res.status(404).json({ error: "Withdrawal request not found." });
+    }
+
+    if (withdrawal.status !== 'pending') {
+      return res.status(400).json({ error: "Only pending requests can be approved." });
+    }
+
+    withdrawal.status = 'approved';
+    withdrawal.approvedAt = new Date();
+
+    await withdrawal.save();
+
+    return res.status(200).json({
+      message: "Withdrawal approved successfully.",
+      withdrawal
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export const rejectWithdrawal = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+
+    const withdrawal = await WithdrawalRequest.findById(requestId);
+
+    if (!withdrawal) {
+      return res.status(404).json({ error: "Withdrawal request not found." });
+    }
+
+    if (withdrawal.status !== 'pending') {
+      return res.status(400).json({ error: "Only pending requests can be rejected." });
+    }
+
+    // Fetch wallet for refund
+    const wallet = await EarningWallet.findOne({ userId: withdrawal.userId });
+
+    if (!wallet) {
+      return res.status(404).json({ error: "User wallet not found." });
+    }
+
+    // Refund to wallet
+    wallet.earnings.push({
+      amount: withdrawal.amount,
+      reason: "Withdrawal Rejected Refund",
+      createdAt: new Date()
+    });
+
+    // Recalculate balance
+    const totalEarnings = wallet.earnings.reduce((sum, e) => sum + e.amount, 0);
+    const totalDeductions = wallet.deductions.reduce((sum, d) => sum + d.amount, 0);
+
+    wallet.balance = totalEarnings - totalDeductions;
+    wallet.lastUpdated = new Date();
+
+    await wallet.save();
+
+    // Update withdrawal status
+    withdrawal.status = 'rejected';
+    withdrawal.rejectedAt = new Date();
+
+    await withdrawal.save();
+
+    return res.status(200).json({
+      message: "Withdrawal rejected and refunded successfully.",
+      withdrawal,
+      newBalance: wallet.balance
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
 
 
 

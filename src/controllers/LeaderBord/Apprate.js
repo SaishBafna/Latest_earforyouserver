@@ -111,3 +111,49 @@ export const updateRating = async (req, res) => {
     });
   }
 };
+
+export const deleteRating = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const rating = await AppRating.findOneAndDelete({ user: userId });
+
+    if (!rating) {
+      return res.status(404).json({
+        message: "Rating not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Rating deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting rating:", error);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
+export const adminDeleteRating = async (req, res) => {
+  try {
+    const { ratingId } = req.params;
+
+    const rating = await AppRating.findByIdAndDelete(ratingId);
+
+    if (!rating) {
+      return res.status(404).json({
+        message: "Rating not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Rating deleted successfully by admin",
+    });
+  } catch (error) {
+    console.error("Error deleting rating by admin:", error);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
